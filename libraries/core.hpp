@@ -53,6 +53,11 @@ extern const Version VERSION;
 */
 #define nthrow(E) std::throw_with_nested(E)
 
+#define noreturn [[noreturn]]
+#ifdef CDT
+#define noreturn
+#endif
+
 /* -----------------------------------------------------------------------------
    Decomposition of pre-built platform names
 ----------------------------------------------------------------------------- */
@@ -380,8 +385,8 @@ extern DC();
 ----------------------------------------------------------------------------- */
 namespace core {
 
-[[noreturn]] void dieHard () noexcept;
-[[noreturn]] void dieHard (const char *msg) noexcept;
+noreturn void dieHard () noexcept;
+noreturn void dieHard (const char *msg) noexcept;
 /**
   Checks that {@p cond} is {@c true}.
 */

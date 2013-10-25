@@ -135,14 +135,14 @@ DC();
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-[[noreturn]] void dieHard () noexcept {
+noreturn void dieHard () noexcept {
   volatile int i = 0;
   int x = 0 / (i - i);
 
   exit(EXIT_FAILURE + static_cast<int>(x - x));
 }
 
-[[noreturn]] void dieHard (const char *msg) noexcept {
+noreturn void dieHard (const char *msg) noexcept {
   fputs(msg, stderr);
   fflush(stderr);
   dieHard();
