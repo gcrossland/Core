@@ -1,7 +1,8 @@
 #include "header.hpp"
 
-using namespace core;
+using core::GeneralException;
 using std::exception;
+using core::check;
 using std::string;
 
 /* -----------------------------------------------------------------------------

@@ -2,10 +2,10 @@
 #include <cstring>
 #include <memory>
 
-using namespace core;
 using std::tuple;
 using std::vector;
 using std::string;
+using core::check;
 using std::move;
 
 /* -----------------------------------------------------------------------------

@@ -168,25 +168,6 @@ extern const Version VERSION;
 #error Exactly one of ARCH_SIGNEDRIGHTSHIFT_LOG and ARCH_SIGNEDRIGHTSHIFT_ARITH must be set
 #endif
 
-namespace core {
-
-/**
-  This provides extra metadata for integer types.
-*/
-// TODO make__ or whatever it's called
-template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
-  /**
-    The number of bits in an instance of the type on the local platform.
-  */
-  pub static constexpr int bits = std::numeric_limits<_i>::digits + std::numeric_limits<_i>::is_signed;
-
-  /**
-    An upper bound on the number of octets needed to store an instance of the
-    type on the local platform in an {@c ieu}/{@c ies}.
-  */
-  pub static constexpr int max_ie_octets = ((bits + std::numeric_limits<_i>::is_signed) + 6) / 7;
-};
-
 #ifdef ARCH_ARM
 typedef unsigned long long int iu64f;
 typedef signed long long int is64f;
@@ -242,6 +223,25 @@ typedef float f32f;
 typedef f64f f64;
 typedef f32f f32;
 #endif
+
+namespace core {
+
+/**
+  This provides extra metadata for integer types.
+*/
+// TODO make__ or whatever it's called
+template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
+  /**
+    The number of bits in an instance of the type on the local platform.
+  */
+  pub static constexpr int bits = std::numeric_limits<_i>::digits + std::numeric_limits<_i>::is_signed;
+
+  /**
+    An upper bound on the number of octets needed to store an instance of the
+    type on the local platform in an {@c ieu}/{@c ies}.
+  */
+  pub static constexpr int max_ie_octets = ((bits + std::numeric_limits<_i>::is_signed) + 6) / 7;
+};
 
 }
 

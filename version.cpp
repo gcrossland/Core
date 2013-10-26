@@ -1,9 +1,10 @@
 #include "header.hpp"
 
-using namespace core;
 using std::tuple;
 using std::vector;
 using std::string;
+using std::get;
+using core::check;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */

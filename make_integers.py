@@ -11,7 +11,8 @@ def main (args):
           "#include \"header.hpp\"\n" +
           "#include <climits>\n" +
           "\n" +
-          "using namespace core;\n" +
+          "using core::numeric_limits;\n" +
+          "using core::check;\n" +
           "\n" +
           "void testIntegers () {\n")
 
