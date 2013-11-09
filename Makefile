@@ -4,8 +4,8 @@ CORE_MIN=0
 LIBS=
 
 PLATFORMFLAGS::=-D$(PLATFORM)
-DEPENDENCIESFLAGS::=-DDEPENDENCIES="$(shell parselibs dependenciesdefn $(LIBS))"
 LIBFLAGS::=$(foreach o,$(LIBS),-I$(LIBCACHEDIR)/$(o)/include) $(foreach o,$(LIBS),-L$(LIBCACHEDIR)/$(o)/lib-$(CONFIG)) $(foreach o,$(shell parselibs libnames $(LIBS)),-l$(o))
+DEPENDENCIESFLAGS::=-DDEPENDENCIES="$(shell parselibs dependenciesdefn $(LIBS))"
 
 core: core.exe
 
@@ -17,12 +17,12 @@ o:
 #CORE_SUB_HDRS=libraries/core_sub.hpp libraries/core_sub.ipp libraries/core_sub.using
 #
 #o/core_sub.o: libraries/core_sub.cpp $(CORE_SUB_HDRS) | o
-#	gcc $(LIBFLAGS) $(PLATFORMFLAGS) $(FLAGS) -x c++ -c $< -o $@
+#	gcc $(PLATFORMFLAGS) $(LIBFLAGS) $(FLAGS) -x c++ -c $< -o $@
 
 CORE_HDRS=libraries/core.hpp libraries/core.ipp libraries/core.using $(CORE_SUB_HDRS)
 
 o/core.o: libraries/core.cpp $(CORE_HDRS) | o
-	gcc $(LIBFLAGS) $(PLATFORMFLAGS) $(FLAGS) $(DEPENDENCIESFLAGS) -DLIB_MAJ=$(CORE_MAJ) -DLIB_MIN=$(CORE_MIN) -x c++ -c $< -o $@
+	gcc $(PLATFORMFLAGS) $(LIBFLAGS) $(DEPENDENCIESFLAGS) -DLIB_MAJ=$(CORE_MAJ) -DLIB_MIN=$(CORE_MIN) $(FLAGS) -x c++ -c $< -o $@
 
 CORE_OBJS=o/core.o $(patsubst libraries/core_%.cpp,o/core_%.o,$(wildcard libraries/core_*.cpp))
 
@@ -30,7 +30,7 @@ CORE_OBJS=o/core.o $(patsubst libraries/core_%.cpp,o/core_%.o,$(wildcard librari
 MAIN_HDRS=header.hpp $(CORE_HDRS)
 
 o/%.o: %.cpp $(MAIN_HDRS) | o
-	gcc $(LIBFLAGS) $(PLATFORMFLAGS) $(FLAGS) -x c++ -c $< -o $@
+	gcc $(PLATFORMFLAGS) $(LIBFLAGS) $(FLAGS) -x c++ -c $< -o $@
 
 MAIN_OBJS=$(patsubst %.cpp,o/%.o,$(wildcard *.cpp))
 
