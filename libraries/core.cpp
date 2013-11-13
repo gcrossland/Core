@@ -22,16 +22,12 @@ const Version VERSION{LIB_MAJ, LIB_MIN}; DEPENDENCIES;
 #ifndef NDEBUG
 namespace debug {
 
-const char *const Logger::Stream::INDENT = "  ";
+const char *const Stream::INDENT = "  ";
 
-Logger::Stream::Stream () noexcept
-  : handle(stderr), indentCount(0), atStartOfLine(true)
-{
+Stream::Stream () noexcept : handle(stderr), indentCount(0), atStartOfLine(true) {
 }
 
-Logger::Stream::Stream (const char *filename) noexcept
-  : indentCount(0), atStartOfLine(true)
-{
+Stream::Stream (const char *filename) noexcept : indentCount(0), atStartOfLine(true) {
   if (!filename) dieHard();
 
   handle = fopen(filename, "wb");
@@ -42,22 +38,22 @@ Logger::Stream::Stream (const char *filename) noexcept
   }
 }
 
-Logger::Stream::~Stream () noexcept {
+Stream::~Stream () noexcept {
   if (handle != stderr) {
     fclose(handle);
   }
 }
 
-void Logger::Stream::enterScope () noexcept {
+void Stream::enterScope () noexcept {
   ++indentCount;
 }
 
-void Logger::Stream::exitScope () noexcept {
+void Stream::exitScope () noexcept {
   if (indentCount == 0) dieHard();
   --indentCount;
 }
 
-void Logger::Stream::startLine () noexcept {
+void Stream::startLine () noexcept {
   if (!atStartOfLine) {
     return;
   }
@@ -68,16 +64,16 @@ void Logger::Stream::startLine () noexcept {
   atStartOfLine = false;
 }
 
-void Logger::Stream::endLine () noexcept {
+void Stream::endLine () noexcept {
   writeElement("\n");
   atStartOfLine = true;
 }
 
-void Logger::Stream::flush () noexcept {
+void Stream::flush () noexcept {
   fflush(handle);
 }
 
-void Logger::Stream::writeElement (const char *value) noexcept {
+void Stream::writeElement (const char *value) noexcept {
   int r = fputs(value, handle);
   if (r < 0) dieHard("failed to write to stream\n");
 }

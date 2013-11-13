@@ -259,29 +259,29 @@ namespace core {
 #ifndef NDEBUG
 namespace debug {
 
+class Stream {
+  prv static const char *const INDENT;
+
+  prv FILE *handle;
+  prv iu indentCount;
+  prv bool atStartOfLine;
+
+  pub explicit Stream () noexcept;
+  pub explicit Stream (const char *filename) noexcept;
+  pub ~Stream () noexcept;
+
+  pub void enterScope () noexcept;
+  pub void exitScope () noexcept;
+
+  pub void startLine () noexcept;
+  pub void endLine () noexcept;
+  pub void flush () noexcept;
+  pub void writeElement (const char *value) noexcept;
+  pub template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) writeElement (_i value) noexcept;
+  pub template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) writeElement (_i value) noexcept;
+};
+
 class Logger {
-  pub class Stream {
-    prv static const char *const INDENT;
-
-    prv FILE *handle;
-    prv iu indentCount;
-    prv bool atStartOfLine;
-
-    pub explicit Stream () noexcept;
-    pub explicit Stream (const char *filename) noexcept;
-    pub ~Stream () noexcept;
-
-    pub void enterScope () noexcept;
-    pub void exitScope () noexcept;
-
-    pub void startLine () noexcept;
-    pub void endLine () noexcept;
-    pub void flush () noexcept;
-    pub void writeElement (const char *value) noexcept;
-    pub template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) writeElement (_i value) noexcept;
-    pub template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) writeElement (_i value) noexcept;
-  };
-
   pub class ScopeProxy
   {
     prv std::shared_ptr<Stream> stream;
@@ -312,8 +312,6 @@ class Logger {
   pub template<typename ..._Ts> void writeLine (_Ts... ts) noexcept;
   prv template<typename _T0, typename ..._Ts> void writeElements (_T0 t0, _Ts... ts) noexcept;
   prv void writeElements () noexcept;
-
-  friend class ScopeProxy;
 };
 
 template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts... ts) noexcept;
@@ -323,37 +321,38 @@ template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond
 
 }
 
+#define DNAME(L) __dl_ ## L
 #ifndef NDEBUG
 /**
   Declares or defines a logger {@p L}.
 */
-#define DC(L) core::debug::Logger __dl_ ## L
+#define DC(L) core::debug::Logger DNAME(L)
 /**
   Opens the logger {@p L}.
 */
-#define DOPEN(L, S) __dl_ ## L.open(S)
+#define DOPEN(L, S) DNAME(L).open(S)
 /**
   Closes the logger {@p L}.
 */
-#define DCLOSE(L) __dl_ ## L.close()
+#define DCLOSE(L) DNAME(L).close()
 /**
   Makes the current scope be a scope for the logger {@p L} (if its open).
 */
-#define DS(L) core::debug::Logger::ScopeProxy __dlsp = __dl_ ## L.defineScope(__FUNCTION__)
+#define DS(L) core::debug::Logger::ScopeProxy __dlsp = DNAME(L).defineScope(__FUNCTION__)
 /**
   Writes a line via the logger (if it's open).
 */
-#define DW(L, ...) __dl_ ## L.writeLine(__VA_ARGS__)
+#define DW(L, ...) DNAME(L).writeLine(__VA_ARGS__)
 /**
   Writes an incomplete line via the logger (if it's open).
 */
-#define DWP(L, ...) __dl_ ## L.write(__VA_ARGS__)
+#define DWP(L, ...) DNAME(L).write(__VA_ARGS__)
 /**
   Validates an assertion.
 */
 #define DA(...) core::debug::assertImpl(__FILE__, __LINE__, __VA_ARGS__)
 #else
-#define D(L) bool __dl_ ## L
+#define D(L) bool DNAME(L)
 #define DOPEN(L, S)
 #define DCLOSE(L)
 #define DS(L)

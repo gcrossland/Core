@@ -11,7 +11,7 @@ namespace core {
 #ifndef NDEBUG
 namespace debug {
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) Logger::Stream::writeElement (_i value) noexcept {
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) Stream::writeElement (_i value) noexcept {
   if (!handle) dieHard();
 
   const char *f = "%llu";
@@ -23,7 +23,7 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   if (r < 0) dieHard("failed to write to stream\n");
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) Logger::Stream::writeElement (_i value) noexcept {
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) Stream::writeElement (_i value) noexcept {
   if (!handle) dieHard();
 
   const char *f = "%lld";
@@ -64,7 +64,7 @@ template<typename _T0, typename ..._Ts> void Logger::writeElements (_T0 t0, _Ts.
 template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts... ts) noexcept {
   if (!cond) {
     Logger l;
-    l.open(std::shared_ptr<Logger::Stream>(new Logger::Stream));
+    l.open(std::shared_ptr<Stream>(new Stream));
     l.write("assertion failed at ", file, ":", line);
     if (sizeof...(_Ts) != 0) {
       l.write(" - ", ts...);
