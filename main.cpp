@@ -11,9 +11,7 @@ using std::move;
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 int main (int argc, char *argv[]) {
-  if (argc > 0) {
-    processName = argv[0];
-  }
+  processName = argc > 0 ? argv[0] : nullptr;
 
   if (argc == 2) {
     char *arg = argv[1];
@@ -44,11 +42,16 @@ int main (int argc, char *argv[]) {
   testDebugAssertionFailure0();
   testDebugAssertionFailure1();
   testGeneralException();
+  testBuildBitmask();
+  testExtendSign();
+  testShifting();
+  testSetAndGet();
+  testIex();
 
   return 0;
 }
 
-const char *processName = nullptr;
+const char *processName;
 
 tuple<int, vector<string>> rerun (const char *arg) {
   if (!processName || processName[0] == 0) {
@@ -64,10 +67,10 @@ tuple<int, vector<string>> rerun (const char *arg) {
   FILE *f = fopen(stderrLeafName, "r");
   check(f);
   char bfr[1024]; // DODGY
-  while (fgets(bfr, sizeof(bfr) / sizeof(*bfr), f) != nullptr) {
+  while (fgets(bfr, static_cast<int>(sizeof(bfr) / sizeof(*bfr)), f) != nullptr) {
     size_t chrCount = strlen(bfr);
     if (chrCount > 0 && bfr[chrCount - 1] == '\n') {
-      bfr[--chrCount] = 0;
+      --chrCount;
     }
     stderrLines.emplace_back(bfr, chrCount);
   }

@@ -140,7 +140,6 @@ noreturn void dieHard (const char *msg) noexcept {
   dieHard();
 }
 
-
 void check (const bool &cond) noexcept {
   if (!cond) {
     dieHard("test failed\n");

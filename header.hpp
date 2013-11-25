@@ -29,5 +29,10 @@ void testDebugAssertionFailure0Impl ();
 void testDebugAssertionFailure1 ();
 void testDebugAssertionFailure1Impl ();
 void testGeneralException ();
+void testBuildBitmask ();
+void testExtendSign ();
+void testShifting ();
+void testSetAndGet ();
+void testIex ();
 
 #endif

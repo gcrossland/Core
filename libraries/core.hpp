@@ -473,9 +473,13 @@ template<typename _i> iff(std::is_integral<_i>::value, _i) get (const iu8f *ptr)
 template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) setIeu (iu8f *&r_ptr, _i value) noexcept;
 template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) setIes (iu8f *&r_ptr, _i value) noexcept;
 template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
 template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (const iu8f *&r_ptr) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (iu8f *&r_ptr) noexcept;
 template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
 template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (const iu8f *&r_ptr) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (iu8f *&r_ptr) noexcept;
 
 }
 
