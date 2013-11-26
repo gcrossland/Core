@@ -318,4 +318,6 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   return getValidIes<_i>(const_cast<const iu8f *&>(r_ptr));
 }
 
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
 }
