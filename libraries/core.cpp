@@ -94,9 +94,8 @@ Logger::ScopeProxy::~ScopeProxy () noexcept {
 
 void Logger::ScopeProxy::writeMarker (bool entering) noexcept {
   stream->startLine();
-  stream->writeElement(entering ? "Entering " : "Exiting ");
+  stream->writeElement(entering ? ">>" : "<<");
   stream->writeElement(scopeName);
-  stream->writeElement(":");
   stream->endLine();
   stream->flush();
 }
