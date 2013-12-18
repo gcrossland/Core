@@ -12,10 +12,10 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
 
   const char *f = "%llu";
   #ifdef OS_WIN32
-  DSA(sizeof(unsigned long long int) == 8, "value is not 64-bit");
+  DSA(sizeof(unsigned long long) == 8, "value is not 64-bit");
   f = "%I64u";
   #endif
-  int r = fprintf(handle, f, static_cast<unsigned long long int>(value));
+  int r = fprintf(handle, f, static_cast<unsigned long long>(value));
   if (r < 0) dieHard("failed to write to stream\n");
 }
 
@@ -24,10 +24,10 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 
   const char *f = "%lld";
   #ifdef OS_WIN32
-  DSA(sizeof(signed long long int) == 8, "value is not 64-bit");
+  DSA(sizeof(signed long long) == 8, "value is not 64-bit");
   f = "%I64d";
   #endif
-  int r = fprintf(handle, f, static_cast<signed long long int>(value));
+  int r = fprintf(handle, f, static_cast<signed long long>(value));
   if (r < 0) dieHard("failed to write to stream\n");
 }
 

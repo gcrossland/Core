@@ -169,12 +169,12 @@ extern const Version VERSION;
 #endif
 
 #ifdef ARCH_ARM
-typedef unsigned long long int iu64f;
-typedef signed long long int is64f;
+typedef unsigned long long iu64f;
+typedef signed long long is64f;
 typedef unsigned int iu32f;
 typedef signed int is32f;
-typedef unsigned short int iu16f;
-typedef signed short int is16f;
+typedef unsigned short iu16f;
+typedef signed short is16f;
 typedef unsigned char iu8f;
 typedef signed char is8f;
 
@@ -197,12 +197,12 @@ typedef f32f f32;
 #endif
 
 #ifdef ARCH_IA
-typedef unsigned long long int iu64f;
-typedef signed long long int is64f;
+typedef unsigned long long iu64f;
+typedef signed long long is64f;
 typedef unsigned int iu32f;
 typedef signed int is32f;
-typedef unsigned short int iu16f;
-typedef signed short int is16f;
+typedef unsigned short iu16f;
+typedef signed short is16f;
 typedef unsigned char iu8f;
 typedef signed char is8f;
 

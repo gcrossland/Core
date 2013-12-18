@@ -3,7 +3,7 @@ import string
 
 SGN = ("u", "s")
 LEN = ("64f", "32f", "16f", "8f", "64", "32", "16", "8", "")
-SUPERBIGTYPE_NAME = "unsigned long long int"
+SUPERBIGTYPE_NAME = "unsigned long long"
 SUPERBIGTYPE_BITS = 64
 SUPERBIGTYPE_SUFFIX = "ULL"
 
