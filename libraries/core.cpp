@@ -147,6 +147,51 @@ void check (const bool &cond) noexcept {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
+void buildExceptionMessagePart (const std::exception &exception, std::string &r_out) {
+  const char *subMsg = exception.what();
+  bool headIsCapitalisable = true;
+  if (*subMsg == '_') {
+    headIsCapitalisable = false;
+    ++subMsg;
+  }
+
+  if (r_out.empty()) {
+    r_out.append(subMsg);
+    if (headIsCapitalisable && !r_out.empty()) {
+      char &c = r_out.front();
+      if (c == static_cast<unsigned char>(c)) {
+        c = static_cast<char>(std::toupper(c));
+      }
+    }
+  } else {
+    r_out.append(": ");
+    r_out.append(subMsg);
+  }
+
+  try {
+    std::rethrow_if_nested(exception);
+  } catch (const std::exception &e) {
+    buildExceptionMessagePart(e, r_out);
+    return;
+  } catch (...) {
+    // Recurse no further.
+  }
+  r_out.append(".");
+  return;
+}
+
+std::string buildExceptionMessage (const std::exception &rootException) {
+  std::string out;
+
+  try {
+    buildExceptionMessagePart(rootException, out);
+  } catch (...) {
+    out = "An error occurred (but further detail is unavailable, as an error occurred while building the message).";
+  }
+
+  return out;
+}
+
 GeneralException::GeneralException (const std::string &msg) : msg(msg) {
 }
 

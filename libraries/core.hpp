@@ -1,7 +1,7 @@
 /** @file */
 /* -----------------------------------------------------------------------------
    Core Library
-   © Geoff Crossland 1998, 1999, 2003, 2004, 2005, 2007, 2008, 2013
+   © Geoff Crossland 1998, 1999, 2003, 2004, 2005, 2007, 2008, 2013, 2014
 ----------------------------------------------------------------------------- */
 #ifndef CORE_ALREADYINCLUDED
 #define CORE_ALREADYINCLUDED
@@ -282,8 +282,7 @@ class Stream {
 };
 
 class Logger {
-  pub class ScopeProxy
-  {
+  pub class ScopeProxy {
     prv std::shared_ptr<Stream> stream;
     prv const char *scopeName;
 
@@ -336,7 +335,7 @@ template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond
 */
 #define DCLOSE(L) DNAME(L).close()
 /**
-  Makes the current scope be a scope for the logger {@p L} (if its open).
+  Makes the current scope be a scope for the logger {@p L} (if it's open).
 */
 #define DS(L) core::debug::Logger::ScopeProxy __dlsp = DNAME(L).defineScope(__FUNCTION__)
 /**
@@ -409,13 +408,24 @@ template<typename _InputIterator0, typename _InputIterator1> void check (_InputI
 ----------------------------------------------------------------------------- */
 namespace core {
 
-// TODO nested exception message composer (and, if a what() has no spaces in, assume it's technical?) (make first chr capital, unless first chr is '_'?)
-class GeneralException : public std::exception {
+/**
+  Builds a message for the given exception and its chain of causes, based on
+  std::exception::what(). Each sub-message is assumed to be a sentence, but
+  without leading capital or trailing full stop (which are added as needed); if
+  a sub-message starts with '_', it is elided and the following character is
+  never capitalised.
+*/
+std::string buildExceptionMessage (const std::exception &rootException);
+
+// TODO split into subclasses that just deal in ptrs to string literals (to avoid allocation then)?
+// TODO have nthrow always create one of these? or #define die?
+class GeneralException : public virtual std::exception {
   prv std::string msg;
 
   pub explicit GeneralException (const std::string &msg);
   pub explicit GeneralException (std::string &&msg);
   pub explicit GeneralException (const char *msg);
+  // TODO: vararg constructor taking many string literals (+ other types?), which might be concatenated in any old buffer? OR pointers kept in an array field...
 
   pub virtual const char *what() const noexcept override;
 };

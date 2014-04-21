@@ -42,6 +42,7 @@ int main (int argc, char *argv[]) {
   testDebugAssertionFailure0();
   testDebugAssertionFailure1();
   testGeneralException();
+  testBuildExceptionMessage();
   testBuildBitmask();
   testExtendSign();
   testShifting();
@@ -79,3 +80,6 @@ tuple<int, vector<string>> rerun (const char *arg) {
 
   return tuple<int, vector<string>>(move(rc), move(stderrLines));
 }
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
