@@ -28,7 +28,7 @@ void testDebugAssertionFailure0 ();
 void testDebugAssertionFailure0Impl ();
 void testDebugAssertionFailure1 ();
 void testDebugAssertionFailure1Impl ();
-void testGeneralException ();
+void testExceptions ();
 void testBuildExceptionMessage ();
 void testBuildBitmask ();
 void testExtendSign ();

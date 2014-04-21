@@ -1,6 +1,6 @@
 #include "header.hpp"
 
-using core::GeneralException;
+using core::PlainException;
 using std::exception;
 using core::check;
 using std::string;
@@ -9,17 +9,30 @@ using core::buildExceptionMessage;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-void testGeneralException () {
+void testExceptions () {
   try {
-    throw GeneralException("cstring message");
+    throw PlainException("cstring message");
   } catch (exception &e) {
     check(string("cstring message"), string(e.what()));
   }
 
   try {
-    throw GeneralException(string("string message"));
+    throw PlainException(string("string message"));
   } catch (exception &e) {
     check(string("string message"), string(e.what()));
+  }
+
+  const char *m0 = "another cstring message";
+  try {
+    throw PlainException::create(m0);
+  } catch (exception &e) {
+    check(m0 == e.what());
+  }
+
+  try {
+    throw PlainException::create("another %%string message");
+  } catch (exception &e) {
+    check(string("another %string message"), string(e.what()));
   }
 }
 
@@ -29,10 +42,10 @@ void testBuildExceptionMessage () {
       try {
         throw runtime_error("an operation failed");
       } catch (...) {
-        nthrow(GeneralException("a thing could not be computed"));
+        nthrow(PlainException("a thing could not be computed"));
       }
     } catch (const exception &e) {
-      nthrow(GeneralException("the user-requested action failed"));
+      nthrow(PlainException("the user-requested action failed"));
     }
     check(false);
   } catch (const exception &e) {
@@ -47,10 +60,10 @@ void testBuildExceptionMessage () {
       try {
         throw runtime_error("__ghi");
       } catch (...) {
-        nthrow(GeneralException("_def"));
+        nthrow(PlainException(string("_def")));
       }
     } catch (const exception &e) {
-      nthrow(GeneralException("_abc"));
+      nthrow(PlainException("_abc"));
     }
     check(false);
   } catch (const exception &e) {
@@ -64,7 +77,7 @@ void testBuildExceptionMessage () {
     try {
       throw "lm";
     } catch (...) {
-      nthrow(GeneralException("jk"));
+      nthrow(PlainException("jk"));
     }
     check(false);
   } catch (const exception &e) {

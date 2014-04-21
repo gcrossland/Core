@@ -417,17 +417,30 @@ namespace core {
 */
 std::string buildExceptionMessage (const std::exception &rootException);
 
-// TODO split into subclasses that just deal in ptrs to string literals (to avoid allocation then)?
-// TODO have nthrow always create one of these? or #define die?
-class GeneralException : public virtual std::exception {
-  prv std::string msg;
+class PlainException : public virtual std::exception {
+  prv const char *const literalMsg;
+  prv const std::shared_ptr<const std::string> composedMsg;
 
-  pub explicit GeneralException (const std::string &msg);
-  pub explicit GeneralException (std::string &&msg);
-  pub explicit GeneralException (const char *msg);
-  // TODO: vararg constructor taking many string literals (+ other types?), which might be concatenated in any old buffer? OR pointers kept in an array field...
+  pub explicit PlainException (const std::string &msg);
+  pub explicit PlainException (std::string &&msg);
+  /**
+    @param msg the message (valid forever).
+  */
+  pub explicit PlainException (const char *msg) noexcept;
 
-  pub virtual const char *what() const noexcept override;
+  /**
+    Returns a PlainException with message created by interpolating the given
+    message template (which must be a string literal). Substitutions all start
+    with the character '%'; '%%' represents a literal percent character.
+
+    @param msgTemplate the message template (valid forever).
+  */
+  // TODO do gettext-style translation on the template
+  // TODO actually do interpolation; have the values as extra args (so position only, rather than by name, unfortunately)
+  pub static PlainException create (const char *msgTemplate);
+  prv static void interpolate (const char *msgTemplate, std::string &r_out);
+
+  pub virtual const char *what () const noexcept override;
 };
 
 }

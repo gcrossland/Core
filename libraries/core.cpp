@@ -192,17 +192,54 @@ std::string buildExceptionMessage (const std::exception &rootException) {
   return out;
 }
 
-GeneralException::GeneralException (const std::string &msg) : msg(msg) {
+PlainException::PlainException (const std::string &msg) : literalMsg(nullptr), composedMsg(new std::string(msg)) {
 }
 
-GeneralException::GeneralException (std::string &&msg) : msg(move(msg)) {
+PlainException::PlainException (std::string &&msg) : literalMsg(nullptr), composedMsg(new std::string(move(msg))) {
 }
 
-GeneralException::GeneralException (const char *msg) : msg(msg) {
+PlainException::PlainException (const char *msg) noexcept : literalMsg(msg), composedMsg(nullptr) {
 }
 
-const char *GeneralException::what() const noexcept {
-  return msg.c_str();
+PlainException PlainException::create (const char *msgTemplate) {
+  const char *i = msgTemplate;
+  char c;
+  while ((c = *(i++)) != 0) {
+    if (c == '%') {
+      --i;
+
+      std::string msg(msgTemplate, i);
+      interpolate(i, msg);
+      return PlainException(move(msg));
+    }
+  }
+
+  return PlainException(msgTemplate);
+}
+
+void PlainException::interpolate (const char *msgTemplate, std::string &r_out) {
+  char c;
+  while ((c = *(msgTemplate++)) != 0) {
+    if (c == '%') {
+      c = *msgTemplate;
+      if (c != 0) {
+        ++msgTemplate;
+        switch (c) {
+          case '%':
+            r_out.push_back('%');
+            break;
+          default:
+            break;
+        }
+      }
+    } else {
+      r_out.push_back(c);
+    }
+  }
+}
+
+const char *PlainException::what () const noexcept {
+  return literalMsg ? literalMsg : composedMsg->c_str();
 }
 
 /* -----------------------------------------------------------------------------

@@ -41,7 +41,7 @@ int main (int argc, char *argv[]) {
   testDebugAssertionSuccess();
   testDebugAssertionFailure0();
   testDebugAssertionFailure1();
-  testGeneralException();
+  testExceptions();
   testBuildExceptionMessage();
   testBuildBitmask();
   testExtendSign();
