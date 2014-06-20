@@ -210,10 +210,10 @@ typedef iu64f iu64;
 typedef is64f is64;
 typedef iu32f iu32;
 typedef is32f is32;
-typedef iu16f iu16;
-typedef is16f is16;
-typedef iu8f iu8;
-typedef is8f is8;
+typedef iu32f iu16;
+typedef is32f is16;
+typedef iu32f iu8;
+typedef is32f is8;
 typedef iu32f iu;
 typedef is32f is;
 
