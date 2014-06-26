@@ -214,7 +214,7 @@ template<typename _i, bool _useSignedFormat> std::tuple<_i, bool> getIex (const 
   do {
     if (r_ptr == ptrEnd) {
       DW(, "ran out of buffer just before reading");
-      throw PlainException(std::string(_useSignedFormat ? "signed" : "unsigned") + " external integer was truncated");
+      throw PlainException(u8string(_useSignedFormat ? u8("signed") : u8("unsigned")) + u8(" external integer was truncated"));
     }
 
     iu8f octet = *(r_ptr++);

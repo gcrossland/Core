@@ -147,25 +147,55 @@ void check (const bool &cond) noexcept {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-void buildExceptionMessagePart (const std::exception &exception, std::string &r_out) {
-  const char *subMsg = exception.what();
+const char *UException::what () const noexcept {
+  return reinterpret_cast<const char *>(uWhat());
+}
+
+void buildExceptionMessagePart (const std::exception &exception, u8string &r_out) {
+  u8string tmp(0, static_cast<char8_t>(0));
+  const char8_t *subMsgBegin, *subMsgEnd;
+
+  const std::exception *e = &exception;
+  const UException *ue = dynamic_cast<const UException *>(e);
+  if (ue) {
+    subMsgBegin = ue->uWhat();
+    subMsgEnd = subMsgBegin + std::char_traits<char8_t>::length(subMsgBegin);
+  } else {
+    subMsgBegin = reinterpret_cast<const char8_t *>(e->what());
+    subMsgEnd = + subMsgBegin + std::char_traits<char>::length(e->what());
+    tmp.append(subMsgBegin, subMsgEnd);
+    subMsgBegin = &tmp[0];
+    subMsgEnd = subMsgBegin + tmp.size();
+
+    // We don't know anything about the native character set, so we'll just make
+    // sure the octets aren't invalid UTF-8 and cross our fingers that something
+    // sensible comes out.
+    for (char8_t &c : tmp) {
+      if (c < 32 || c >= 128) {
+        c = U'?';
+      }
+    }
+  }
+  // TODO if the message doesn't look like a sentence (e.g. has no spaces in), stop here? (and hoist putting the . on the end)
+
   bool headIsCapitalisable = true;
-  if (*subMsg == '_') {
+  if (subMsgBegin != subMsgEnd && *subMsgBegin == U'_') {
     headIsCapitalisable = false;
-    ++subMsg;
+    ++subMsgBegin;
   }
 
   if (r_out.empty()) {
-    r_out.append(subMsg);
+    r_out.append(subMsgBegin, subMsgEnd);
     if (headIsCapitalisable && !r_out.empty()) {
-      char &c = r_out.front();
-      if (c == static_cast<unsigned char>(c)) {
-        c = static_cast<char>(std::toupper(c));
+      char8_t &c = r_out.front();
+      // TODO do this properly (against the first character, according to the current locale)
+      if (c < 128) {
+        c = static_cast<char8_t>(std::toupper(c));
       }
     }
   } else {
-    r_out.append(": ");
-    r_out.append(subMsg);
+    r_out.append(u8(": "));
+    r_out.append(subMsgBegin, subMsgEnd);
   }
 
   try {
@@ -176,39 +206,39 @@ void buildExceptionMessagePart (const std::exception &exception, std::string &r_
   } catch (...) {
     // Recurse no further.
   }
-  r_out.append(".");
+  r_out.append(u8("."));
   return;
 }
 
-std::string buildExceptionMessage (const std::exception &rootException) {
-  std::string out;
+u8string buildExceptionMessage (const std::exception &rootException) {
+  u8string out;
 
   try {
     buildExceptionMessagePart(rootException, out);
   } catch (...) {
-    out = "An error occurred (but further detail is unavailable, as an error occurred while building the message).";
+    out = u8("An error occurred (but further detail is unavailable, as an error occurred while building the message).");
   }
 
   return out;
 }
 
-PlainException::PlainException (const std::string &msg) : literalMsg(nullptr), composedMsg(new std::string(msg)) {
+PlainException::PlainException (const u8string &msg) : literalMsg(nullptr), composedMsg(new u8string(msg)) {
 }
 
-PlainException::PlainException (std::string &&msg) : literalMsg(nullptr), composedMsg(new std::string(move(msg))) {
+PlainException::PlainException (u8string &&msg) : literalMsg(nullptr), composedMsg(new u8string(move(msg))) {
 }
 
-PlainException::PlainException (const char *msg) noexcept : literalMsg(msg), composedMsg(nullptr) {
+PlainException::PlainException (const char8_t *msg) noexcept : literalMsg(msg), composedMsg(nullptr) {
 }
 
-PlainException PlainException::create (const char *msgTemplate) {
-  const char *i = msgTemplate;
-  char c;
+PlainException PlainException::create (const char8_t *msgTemplate) {
+  const char8_t *i = msgTemplate;
+  char8_t c;
   while ((c = *(i++)) != 0) {
     if (c == '%') {
       --i;
 
-      std::string msg(msgTemplate, i);
+      u8string msg(msgTemplate, i);
       interpolate(i, msg);
       return PlainException(move(msg));
     }
@@ -217,8 +247,8 @@ PlainException PlainException::create (const char *msgTemplate) {
   return PlainException(msgTemplate);
 }
 
-void PlainException::interpolate (const char *msgTemplate, std::string &r_out) {
-  char c;
+void PlainException::interpolate (const char8_t *msgTemplate, u8string &r_out) {
+  char8_t c;
   while ((c = *(msgTemplate++)) != 0) {
     if (c == '%') {
       c = *msgTemplate;
@@ -238,7 +268,7 @@ void PlainException::interpolate (const char *msgTemplate, std::string &r_out) {
   }
 }
 
-const char *PlainException::what () const noexcept {
+const char8_t *PlainException::uWhat () const noexcept {
   return literalMsg ? literalMsg : composedMsg->c_str();
 }
 

@@ -10,6 +10,7 @@
 #include <exception>
 #include <limits>
 #include <memory>
+#include <uchar.h>
 #include <string>
 
 namespace core {
@@ -249,7 +250,7 @@ template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
    Debugging tools
 ----------------------------------------------------------------------------- */
 // To aid debugging and any other diagnostic work necessary before proper
-// string infrastructure is in place, we allow the concept of C++ string
+// string infrastructure is in place, we allow the concept of C++ native string
 // literals as some platform-dependent developer-readable message format and
 // include support for rendering these and some other primitives to debugging
 // streams.
@@ -404,9 +405,66 @@ template<typename _InputIterator0, typename _InputIterator1> void check (_InputI
 }
 
 /* -----------------------------------------------------------------------------
+   Characters
+----------------------------------------------------------------------------- */
+
+#ifndef __STDC_UTF_32__
+#error __STDC_UTF_32__ is required
+#endif
+
+#ifndef __STDC_UTF_16__
+#error __STDC_UTF_16__ is required
+#endif
+
+/**
+  A type for storing UTF-8 code units.
+*/
+typedef unsigned char char8_t;
+/**
+  The standard non-fixed type for holding Unicode code points.
+*/
+typedef iu32 uchar;
+
+/**
+  Creates a UTF-8 string literal of char8_ts.
+*/
+#define u8(S) reinterpret_cast<const char8_t *>(u8"" S)
+/**
+  Creates a UTF-32 string literal of char32_ts.
+*/
+#define u32(S) (U"" S)
+
+namespace core {
+
+/**
+  Instances hold a sequence of 0 or more valid characters encoded in UTF-8.
+ */
+// TODO replace std::basic_string
+typedef std::basic_string<char8_t> u8string;
+
+/**
+  Instances hold a sequence of 0 or more valid characters encoded in UTF-32.
+ */
+typedef std::u32string u32string;
+
+}
+
+/* -----------------------------------------------------------------------------
    Exception utilities
 ----------------------------------------------------------------------------- */
 namespace core {
+
+/**
+  A base exception type for those with Unicode messages.
+ */
+class UException : public virtual std::exception {
+  /**
+    Returns a pointer to the start of a \0-terminated UTF-8 string (valid until
+    destruction) describing the cause of the exception.
+   */
+  pub virtual const char8_t *uWhat () const noexcept = 0;
+  pub const char *what () const noexcept override;
+};
 
 /**
   Builds a message for the given exception and its chain of causes, based on
@@ -415,18 +473,27 @@ namespace core {
   a sub-message starts with '_', it is elided and the following character is
   never capitalised.
 */
-std::string buildExceptionMessage (const std::exception &rootException);
+u8string buildExceptionMessage (const std::exception &rootException);
 
-class PlainException : public virtual std::exception {
-  prv const char *const literalMsg;
-  prv const std::shared_ptr<const std::string> composedMsg;
+/**
+  An exception type that uses only a user-readable string to express its cause.
+  It is expected that the message should be of format compatible with
+  ::buildExceptionMessage().
+ */
+class PlainException : public virtual UException {
+  prv const char8_t *const literalMsg;
+  prv const std::shared_ptr<const u8string> composedMsg;
 
-  pub explicit PlainException (const std::string &msg);
-  pub explicit PlainException (std::string &&msg);
+  pub explicit PlainException (const u8string &msg);
+  pub explicit PlainException (u8string &&msg);
   /**
     @param msg the message (valid forever).
   */
-  pub explicit PlainException (const char *msg) noexcept;
+  pub explicit PlainException (const char8_t *msg) noexcept;
+  pub PlainException (const PlainException &) = default;
+  pub PlainException &operator= (const PlainException &) = default;
+  pub PlainException (PlainException &&) = default;
+  pub PlainException &operator= (PlainException &&) = default;
 
   /**
     Returns a PlainException with message created by interpolating the given
@@ -437,10 +504,10 @@ class PlainException : public virtual std::exception {
   */
   // TODO do gettext-style translation on the template
   // TODO actually do interpolation; have the values as extra args (so position only, rather than by name, unfortunately)
-  pub static PlainException create (const char *msgTemplate);
-  prv static void interpolate (const char *msgTemplate, std::string &r_out);
+  pub static PlainException create (const char8_t *msgTemplate);
+  prv static void interpolate (const char8_t *msgTemplate, u8string &r_out);
 
-  pub virtual const char *what () const noexcept override;
+  pub virtual const char8_t *uWhat () const noexcept override;
 };
 
 }
