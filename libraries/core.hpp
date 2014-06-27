@@ -405,6 +405,67 @@ template<typename _InputIterator0, typename _InputIterator1> void check (_InputI
 }
 
 /* -----------------------------------------------------------------------------
+   Platform-tailored utilities
+----------------------------------------------------------------------------- */
+namespace core {
+
+/**
+  Builds an integer with the bottom {@p index} bits set.
+*/
+template<typename _i> _i buildBitmask (iu index) noexcept;
+/**
+  Treats bit {@p index} in {@p value} (which must be zero
+  above {@p index}) as a two's-complement sign bit and sign extends
+  {@p value}.
+*/
+template<typename _i> _i extendSign (_i value, iu index) noexcept;
+
+/**
+  Performs a left shift on a value, where the shift can be greater than the
+  number of bits that the value's type can hold.
+*/
+template<typename _i> _i sl (_i value, iu sh) noexcept;
+/**
+  Performs an arithmetic right shift on a signed value or a logical right shift
+  on an unsigned value, where the shift can be greater than the number of bits
+  that the value's type can hold.
+
+  @param value the value to shift.
+  @param sh the number of places to shift right by.
+  @return value asr sh
+*/
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) sr (_i value, iu sh) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) sr (_i value, iu sh) noexcept;
+
+// These allow writing of integer types to octet arrays of arbitrary alignment,
+// using the local platform's integer representation format (i.e. giving the
+// same result as a memcpy of the integer value to an iu8f[])...
+
+/**
+  Writes a value of type {@p _i} to the given octet array.
+*/
+template<typename _i> iff(std::is_integral<_i>::value, void) set (iu8f *ptr, _i value) noexcept;
+/**
+  Reads a value of type {@p _i} from the given octet array.
+*/
+template<typename _i> iff(std::is_integral<_i>::value, _i) get (const iu8f *ptr) noexcept;
+
+// ... and a platform-independent variable-length format.
+
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) setIeu (iu8f *&r_ptr, _i value) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) setIes (iu8f *&r_ptr, _i value) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (const iu8f *&r_ptr) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (iu8f *&r_ptr) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (const iu8f *&r_ptr) noexcept;
+template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (iu8f *&r_ptr) noexcept;
+
+}
+
+/* -----------------------------------------------------------------------------
    Characters
 ----------------------------------------------------------------------------- */
 
@@ -509,67 +570,6 @@ class PlainException : public virtual UException {
 
   pub virtual const char8_t *uWhat () const noexcept override;
 };
-
-}
-
-/* -----------------------------------------------------------------------------
-   Platform-tailored utilities
------------------------------------------------------------------------------ */
-namespace core {
-
-/**
-  Builds an integer with the bottom {@p index} bits set.
-*/
-template<typename _i> _i buildBitmask (iu index) noexcept;
-/**
-  Treats bit {@p index} in {@p value} (which must be zero
-  above {@p index}) as a two's-complement sign bit and sign extends
-  {@p value}.
-*/
-template<typename _i> _i extendSign (_i value, iu index) noexcept;
-
-/**
-  Performs a left shift on a value, where the shift can be greater than the
-  number of bits that the value's type can hold.
-*/
-template<typename _i> _i sl (_i value, iu sh) noexcept;
-/**
-  Performs an arithmetic right shift on a signed value or a logical right shift
-  on an unsigned value, where the shift can be greater than the number of bits
-  that the value's type can hold.
-
-  @param value the value to shift.
-  @param sh the number of places to shift right by.
-  @return value asr sh
-*/
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) sr (_i value, iu sh) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) sr (_i value, iu sh) noexcept;
-
-// These allow writing of integer types to octet arrays of arbitrary alignment,
-// using the local platform's integer representation format (i.e. giving the
-// same result as a memcpy of the integer value to an iu8f[])...
-
-/**
-  Writes a value of type {@p _i} to the given octet array.
-*/
-template<typename _i> iff(std::is_integral<_i>::value, void) set (iu8f *ptr, _i value) noexcept;
-/**
-  Reads a value of type {@p _i} from the given octet array.
-*/
-template<typename _i> iff(std::is_integral<_i>::value, _i) get (const iu8f *ptr) noexcept;
-
-// ... and a platform-independent variable-length format.
-
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) setIeu (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) setIes (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (const iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (const iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (iu8f *&r_ptr) noexcept;
 
 }
 
