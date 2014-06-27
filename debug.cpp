@@ -1,20 +1,18 @@
 #include "header.hpp"
 #include <memory>
 
-using std::tuple;
 using std::vector;
-using std::string;
 using std::get;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 void testDebugLoggingToStdout () {
   #ifndef NDEBUG
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   core::check(0, get<0>(result));
 
-  const vector<string> &stderrLines = get<1>(result);
-  const vector<string> expectedLines{
+  const vector<std::string> &stderrLines = get<1>(result);
+  const vector<std::string> expectedLines{
     "line 100",
     ">>testSimpleNesting",
     "  line 102",
@@ -208,7 +206,7 @@ void testDebugLoggingToFile () {
   core::check(ferror(f) == 0);
   fclose(f);
   remove(logLeafName);
-  core::check(string("line 00\n>>testDebugLoggingToFile\n  \xEF\xBB\xBFline 01\xEF\xBB\xBF\n<<testDebugLoggingToFile\n"), string(bfr, charCount));
+  core::check(std::string("line 00\n>>testDebugLoggingToFile\n  \xEF\xBB\xBFline 01\xEF\xBB\xBF\n<<testDebugLoggingToFile\n"), std::string(bfr, charCount));
   #endif
 }
 
@@ -221,12 +219,12 @@ void testDebugAssertionSuccess () {
 
 void testDebugAssertionFailure0 () {
   #ifndef NDEBUG
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   core::check(get<0>(result) != 0);
 
   bool foundMessage = false;
   for (const auto &line : get<1>(result)) {
-    if (line.find("the failure message") != string::npos) {
+    if (line.find("the failure message") != std::string::npos) {
       foundMessage = true;
       break;
     }
@@ -241,12 +239,12 @@ void testDebugAssertionFailure0Impl () {
 
 void testDebugAssertionFailure1 () {
   #ifndef NDEBUG
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   core::check(get<0>(result) != 0);
 
   bool foundMessage = false;
   for (const auto &line : get<1>(result)) {
-    if (line.find("message 0f failure") != string::npos) {
+    if (line.find("message 0f failure") != std::string::npos) {
       foundMessage = true;
       break;
     }

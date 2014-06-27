@@ -232,7 +232,7 @@ template<typename _i, bool _useSignedFormat> std::tuple<_i, bool> getIex (const 
       is topBitIndex = numeric_limits<_i>::bits - 1 - static_cast<is>(valueIndex);
       if (topBitIndex < 0 || (topBitIndex < 7 && (octet >> (topBitIndex + 1)) != 0)) {
         DW(, "overflow has occurred");
-        throw std::overflow_error(std::string(_useSignedFormat ? "signed" : "unsigned") + " external integer was too big");
+        throw std::overflow_error(string<char>(_useSignedFormat ? "signed" : "unsigned") + " external integer was too big");
       }
 
       value |= static_cast<_i>(static_cast<_i>(octet) << valueIndex);

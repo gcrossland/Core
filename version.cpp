@@ -1,8 +1,5 @@
 #include "header.hpp"
 
-using std::tuple;
-using std::vector;
-using std::string;
 using std::get;
 using core::check;
 
@@ -13,7 +10,7 @@ void testVersionSuccess () {
 }
 
 void testVersionFailure0 () {
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   check(get<0>(result) != 0);
   check(get<1>(result).size() != 0);
 }
@@ -23,7 +20,7 @@ void testVersionFailure0Impl () {
 }
 
 void testVersionFailure1 () {
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   check(get<0>(result) != 0);
   check(get<1>(result).size() != 0);
 }
@@ -34,7 +31,7 @@ void testVersionFailure1Impl () {
 }
 
 void testVersionFailure2 () {
-  tuple<int, vector<string>> result = rerun(__FUNCTION__ + 4);
+  auto result = rerun(__FUNCTION__ + 4);
   check(get<0>(result) != 0);
   check(get<1>(result).size() != 0);
 }

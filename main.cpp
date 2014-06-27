@@ -4,7 +4,6 @@
 
 using std::tuple;
 using std::vector;
-using std::string;
 using core::check;
 using std::move;
 
@@ -54,16 +53,16 @@ int main (int argc, char *argv[]) {
 
 const char *processName;
 
-tuple<int, vector<string>> rerun (const char *arg) {
+tuple<int, vector<std::string>> rerun (const char *arg) {
   if (!processName || processName[0] == 0) {
     check(false);
   }
 
   const char *stderrLeafName = ".err.txt";
 
-  const string cmdLine = string(processName) + " " + arg + " 2>" + stderrLeafName;
+  const std::string cmdLine = std::string(processName) + " " + arg + " 2>" + stderrLeafName;
   int rc = system(cmdLine.c_str());
-  vector<string> stderrLines;
+  vector<std::string> stderrLines;
 
   FILE *f = fopen(stderrLeafName, "r");
   check(f);
@@ -78,7 +77,7 @@ tuple<int, vector<string>> rerun (const char *arg) {
   fclose(f);
   remove(stderrLeafName);
 
-  return tuple<int, vector<string>>(move(rc), move(stderrLines));
+  return tuple<int, vector<std::string>>(move(rc), move(stderrLines));
 }
 
 /* -----------------------------------------------------------------------------

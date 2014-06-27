@@ -499,15 +499,17 @@ typedef iu32 uchar;
 namespace core {
 
 /**
+  Instances hold a sequence of 0 or more values of a POD type.
+*/
+template <class _c> using string = typename std::basic_string<_c>;
+/**
   Instances hold a sequence of 0 or more valid characters encoded in UTF-8.
- */
-// TODO replace std::basic_string
-typedef std::basic_string<char8_t> u8string;
-
+*/
+typedef string<char8_t> u8string;
 /**
   Instances hold a sequence of 0 or more valid characters encoded in UTF-32.
- */
-typedef std::u32string u32string;
+*/
+typedef string<char32_t> u32string;
 
 }
 
@@ -518,12 +520,12 @@ namespace core {
 
 /**
   A base exception type for those with Unicode messages.
- */
+*/
 class UException : public virtual std::exception {
   /**
     Returns a pointer to the start of a \0-terminated UTF-8 string (valid until
     destruction) describing the cause of the exception.
-   */
+  */
   pub virtual const char8_t *uWhat () const noexcept = 0;
   pub const char *what () const noexcept override;
 };
@@ -541,7 +543,7 @@ u8string buildExceptionMessage (const std::exception &rootException);
   An exception type that uses only a user-readable string to express its cause.
   It is expected that the message should be of format compatible with
   ::buildExceptionMessage().
- */
+*/
 class PlainException : public virtual UException {
   prv const char8_t *const literalMsg;
   prv const std::shared_ptr<const u8string> composedMsg;
