@@ -74,6 +74,16 @@ void Stream::writeElement (const char *value) noexcept {
   if (r < 0) dieHard("failed to write to stream\n");
 }
 
+void Stream::writeElement (const char8_t *value) noexcept {
+  // We're not even going to think about converting the characters to the native
+  // charenc. Instead, we make the value stand out (by wrapping it in the BOM) and
+  // hope that the writing won't make the bytes unintelligible.
+  const char *const bom = "\xEF\xBB\xBF";
+  this->writeElement(bom);
+  this->writeElement(reinterpret_cast<const char *>(value));
+  this->writeElement(bom);
+}
+
 Logger::ScopeProxy::ScopeProxy (Logger &logger, const char *scopeName) noexcept
   : stream(logger.stream), scopeName(scopeName)
 {

@@ -278,6 +278,7 @@ class Stream {
   pub void endLine () noexcept;
   pub void flush () noexcept;
   pub void writeElement (const char *value) noexcept;
+  pub void writeElement (const unsigned char *value) noexcept;
   pub template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) writeElement (_i value) noexcept;
   pub template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) writeElement (_i value) noexcept;
 };

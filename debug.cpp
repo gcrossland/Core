@@ -194,7 +194,7 @@ void testDebugLoggingToFile () {
     DW(A, "line 00");
     {
       DS(A);
-      DW(A, "line 01");
+      DW(A, u8("line 01"));
       DCLOSE(A);
       DW(A, "line 02");
     }
@@ -208,7 +208,7 @@ void testDebugLoggingToFile () {
   core::check(ferror(f) == 0);
   fclose(f);
   remove(logLeafName);
-  core::check(string("line 00\n>>testDebugLoggingToFile\n  line 01\n<<testDebugLoggingToFile\n"), string(bfr, charCount));
+  core::check(string("line 00\n>>testDebugLoggingToFile\n  \xEF\xBB\xBFline 01\xEF\xBB\xBF\n<<testDebugLoggingToFile\n"), string(bfr, charCount));
   #endif
 }
 
