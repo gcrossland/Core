@@ -84,8 +84,8 @@ void Stream::writeElement (const char8_t *value) noexcept {
   this->writeElement(bom);
 }
 
-Logger::ScopeProxy::ScopeProxy (Logger &logger, const char *scopeName) noexcept
-  : stream(logger.stream), scopeName(scopeName)
+Logger::ScopeProxy::ScopeProxy (Logger &logger, const char *scopeName) noexcept :
+  stream(logger.stream), scopeName(scopeName)
 {
   if (!scopeName) dieHard();
 
