@@ -537,7 +537,7 @@ class UException : public virtual std::exception {
   a sub-message starts with '_', it is elided and the following character is
   never capitalised.
 */
-u8string buildExceptionMessage (const std::exception &rootException);
+u8string buildExceptionMessage (const std::exception &rootException, bool capitaliseHead);
 
 /**
   An exception type that uses only a user-readable string to express its cause.

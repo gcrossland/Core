@@ -54,7 +54,7 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e);
+    u8string wholeMsg = buildExceptionMessage(e, true);
     check(u8string(u8("The user-requested action failed: a thing could not be comput\u00A3d: an op?ration failed.")), wholeMsg);
   } catch (...) {
     check(false);
@@ -72,7 +72,7 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e);
+    u8string wholeMsg = buildExceptionMessage(e, true);
     check(u8string(u8("abc: def: _ghi.")), wholeMsg);
   } catch (...) {
     check(false);
@@ -86,8 +86,8 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e);
-    check(u8string(u8("Jk.")), wholeMsg);
+    u8string wholeMsg = buildExceptionMessage(e, false);
+    check(u8string(u8("jk.")), wholeMsg);
   } catch (...) {
     check(false);
   }

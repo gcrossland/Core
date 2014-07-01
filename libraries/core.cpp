@@ -161,7 +161,7 @@ const char *UException::what () const noexcept {
   return reinterpret_cast<const char *>(uWhat());
 }
 
-void buildExceptionMessagePart (const std::exception &exception, u8string &r_out) {
+void buildExceptionMessagePart (const std::exception &exception, bool capitaliseHead, u8string &r_out) {
   u8string tmp(0, static_cast<char8_t>(0));
   const char8_t *subMsgBegin, *subMsgEnd;
 
@@ -188,7 +188,7 @@ void buildExceptionMessagePart (const std::exception &exception, u8string &r_out
   }
   // TODO if the message doesn't look like a sentence (e.g. has no spaces in), stop here? (and hoist putting the . on the end)
 
-  bool headIsCapitalisable = true;
+  bool headIsCapitalisable = capitaliseHead;
   if (subMsgBegin != subMsgEnd && *subMsgBegin == U'_') {
     headIsCapitalisable = false;
     ++subMsgBegin;
@@ -211,7 +211,7 @@ void buildExceptionMessagePart (const std::exception &exception, u8string &r_out
   try {
     std::rethrow_if_nested(exception);
   } catch (const std::exception &e) {
-    buildExceptionMessagePart(e, r_out);
+    buildExceptionMessagePart(e, capitaliseHead, r_out);
     return;
   } catch (...) {
     // Recurse no further.
@@ -220,11 +220,11 @@ void buildExceptionMessagePart (const std::exception &exception, u8string &r_out
   return;
 }
 
-u8string buildExceptionMessage (const std::exception &rootException) {
+u8string buildExceptionMessage (const std::exception &rootException, bool capitaliseHead) {
   u8string out;
 
   try {
-    buildExceptionMessagePart(rootException, out);
+    buildExceptionMessagePart(rootException, capitaliseHead, out);
   } catch (...) {
     out = u8("An error occurred (but further detail is unavailable, as an error occurred while building the message).");
   }
