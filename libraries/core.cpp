@@ -162,7 +162,7 @@ const char *UException::what () const noexcept {
 }
 
 void buildExceptionMessagePart (const std::exception &exception, bool capitaliseHead, u8string &r_out) {
-  u8string tmp(0, static_cast<char8_t>(0));
+  u8string tmp(static_cast<u8string::size_type>(0), static_cast<char8_t>(0));
   const char8_t *subMsgBegin, *subMsgEnd;
 
   const std::exception *e = &exception;

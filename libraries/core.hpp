@@ -501,7 +501,16 @@ namespace core {
 /**
   Instances hold a sequence of 0 or more values of a POD type.
 */
-template <class _c> using string = typename std::basic_string<_c>;
+template <typename _c> class string : public std::basic_string<_c> {
+  pub template <typename ..._Ts> string (_Ts... ts);
+
+  /**
+    Resizes the string to contain the specified number of characters. If the size
+    increases, additional characters of unspecified value are appended.
+  */
+  pub void resize_any (typename string<_c>::size_type count);
+};
+
 /**
   Instances hold a sequence of 0 or more valid characters encoded in UTF-8.
 */

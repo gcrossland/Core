@@ -320,4 +320,15 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
+template <typename _c> template <typename ..._Ts> string<_c>::string (_Ts... ts) :
+  std::basic_string<_c>(ts...)
+{
+}
+
+template <typename _c> void string<_c>::resize_any (typename string<_c>::size_type count) {
+  this->resize(count, 0x58);
+}
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
 }
