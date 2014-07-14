@@ -124,6 +124,22 @@ template<typename _i> _i extendSign (_i value, iu index) noexcept {
 }
 #endif
 
+template<typename _i> iu getLowestSetBit (_i value) noexcept {
+  auto v = static_cast<typename std::make_unsigned<_i>::type>(value);
+
+  int r;
+  if (sizeof(v) > sizeof(long long)) {
+    DPRE(false, "_i is too long");
+  } else if (sizeof(v) > sizeof(long)) {
+    r = __builtin_ffsll(static_cast<long long>(v));
+  } else if (sizeof(v) > sizeof(int)) {
+    r = __builtin_ffsl(static_cast<long>(v));
+  } else {
+    r = __builtin_ffs(static_cast<int>(v));
+  }
+  return static_cast<iu>(r) - 1;
+}
+
 template<typename _i> _i sl (_i value, iu sh) noexcept {
   #ifndef ARCH_OORLEFTSHIFT
   if (sh >= numeric_limits<_i>::bits) {

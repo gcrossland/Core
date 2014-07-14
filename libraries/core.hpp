@@ -420,6 +420,12 @@ template<typename _i> _i createBitmask (iu index) noexcept;
   {@p value}.
 */
 template<typename _i> _i extendSign (_i value, iu index) noexcept;
+/**
+  Gets the index of the least significant set bit in {@p value} or, if
+  {@p value} is zero, a value greater than or equal to
+  ::numeric_limits<_i>::bits.
+*/
+template<typename _i> iu getLowestSetBit (_i value) noexcept;
 
 /**
   Performs a left shift on a value, where the shift can be greater than the
