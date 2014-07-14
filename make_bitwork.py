@@ -17,7 +17,7 @@ def main (args):
           "\n" +
           "using core::numeric_limits;\n" +
           "using core::check;\n" +
-          "using core::buildBitmask;\n" +
+          "using core::createBitmask;\n" +
           "using core::extendSign;\n" +
           "using core::sl;\n" +
           "using core::sr;\n" +
@@ -31,7 +31,7 @@ def main (args):
           "using core::getIes;\n" +
           "using core::getValidIes;\n" +
           "\n" +
-          "void testBuildBitmask () {\n")
+          "void testCreateBitmask () {\n")
 
   def makeLowMask (bits):
     result = ""
@@ -50,7 +50,7 @@ def main (args):
               "  // Test " + type + ".\n" +
               "  {\n" +
               "    for (iu i = 0; i != (numeric_limits<" + type + ">::bits + 1); ++i) {\n" +
-              "      check(static_cast<" + type + ">(bitmasks[i]), buildBitmask<" + type + ">(i));\n" +
+              "      check(static_cast<" + type + ">(bitmasks[i]), createBitmask<" + type + ">(i));\n" +
               "    }\n" +
               "  }\n")
 
@@ -127,7 +127,7 @@ def main (args):
       if typeSgn == "u":
         f.write("        check(static_cast<" + type + ">(value >> i), sr(value, i));\n")
       else:
-        f.write("        auto srValueMask = buildBitmask<" + type + ">(numeric_limits<" + type + ">::bits - i);\n" +
+        f.write("        auto srValueMask = createBitmask<" + type + ">(numeric_limits<" + type + ">::bits - i);\n" +
                 "        check(static_cast<" + type + ">(((value >> i) & srValueMask) | (topBitSet ? ~srValueMask : 0)), sr(value, i));\n")
       f.write("      }\n" +
               "      for (; i != (numeric_limits<" + type + ">::bits + 1); ++i) {\n" +
@@ -135,7 +135,7 @@ def main (args):
       if typeSgn == "u":
         f.write("        check(0, sr(value, i));\n")
       else:
-        f.write("        check(topBitSet ? buildBitmask<" + type + ">(numeric_limits<" + type + ">::bits) : 0, sr(value, i));\n")
+        f.write("        check(topBitSet ? createBitmask<" + type + ">(numeric_limits<" + type + ">::bits) : 0, sr(value, i));\n")
       f.write("      }\n" +
               "    }\n" +
               "  }\n")
@@ -236,7 +236,7 @@ def main (args):
                 "      auto iexSize = topBitSet ? valueDatum.negativeIesSize : valueDatum.positiveIesSize;\n" +
                 "      auto iex = (topBitSet ? valueDatum.negativeIes : valueDatum.positiveIes).get();\n")
       f.write("\n" +
-              "      bool inWritingRange = (valueDatum.value & ~buildBitmask<" + SUPERBIGTYPE_NAME + ">(numeric_limits<" + type + ">::bits)) == 0;\n" +
+              "      bool inWritingRange = (valueDatum.value & ~createBitmask<" + SUPERBIGTYPE_NAME + ">(numeric_limits<" + type + ">::bits)) == 0;\n" +
               "      if (inWritingRange) {\n" +
               "        iu8f b[16];\n" +
               "        iu8f *bi = b;\n" +

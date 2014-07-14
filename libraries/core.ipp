@@ -107,7 +107,7 @@ template<typename _InputIterator0, typename _InputIterator1> void check (_InputI
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 #ifdef ARCH_TWOCINTS
-template<typename _i> _i buildBitmask (iu index) noexcept {
+template<typename _i> _i createBitmask (iu index) noexcept {
   DPRE(index <= numeric_limits<_i>::bits, "index must be within range for the type _i");
 
   return static_cast<_i>(sl<_i>(1, index) - 1);

@@ -161,7 +161,7 @@ const char *UException::what () const noexcept {
   return reinterpret_cast<const char *>(uWhat());
 }
 
-void buildExceptionMessagePart (const std::exception &exception, bool capitaliseHead, u8string &r_out) {
+void createExceptionMessagePart (const std::exception &exception, bool capitaliseHead, u8string &r_out) {
   u8string tmp(static_cast<u8string::size_type>(0), static_cast<char8_t>(0));
   const char8_t *subMsgBegin, *subMsgEnd;
 
@@ -211,7 +211,7 @@ void buildExceptionMessagePart (const std::exception &exception, bool capitalise
   try {
     std::rethrow_if_nested(exception);
   } catch (const std::exception &e) {
-    buildExceptionMessagePart(e, capitaliseHead, r_out);
+    createExceptionMessagePart(e, capitaliseHead, r_out);
     return;
   } catch (...) {
     // Recurse no further.
@@ -220,13 +220,13 @@ void buildExceptionMessagePart (const std::exception &exception, bool capitalise
   return;
 }
 
-u8string buildExceptionMessage (const std::exception &rootException, bool capitaliseHead) {
+u8string createExceptionMessage (const std::exception &rootException, bool capitaliseHead) {
   u8string out;
 
   try {
-    buildExceptionMessagePart(rootException, capitaliseHead, out);
+    createExceptionMessagePart(rootException, capitaliseHead, out);
   } catch (...) {
-    out = u8("An error occurred (but further detail is unavailable, as an error occurred while building the message).");
+    out = u8("An error occurred (but further detail is unavailable, as an error occurred while composing the message).");
   }
 
   return out;

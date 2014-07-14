@@ -7,7 +7,7 @@ using std::exception;
 using core::check;
 using core::u8string;
 using std::runtime_error;
-using core::buildExceptionMessage;
+using core::createExceptionMessage;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
@@ -41,7 +41,7 @@ void testExceptions () {
   }
 }
 
-void testBuildExceptionMessage () {
+void testCreateExceptionMessage () {
   try {
     try {
       try {
@@ -54,7 +54,7 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e, true);
+    u8string wholeMsg = createExceptionMessage(e, true);
     check(u8string(u8("The user-requested action failed: a thing could not be comput\u00A3d: an op?ration failed.")), wholeMsg);
   } catch (...) {
     check(false);
@@ -72,7 +72,7 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e, true);
+    u8string wholeMsg = createExceptionMessage(e, true);
     check(u8string(u8("abc: def: _ghi.")), wholeMsg);
   } catch (...) {
     check(false);
@@ -86,7 +86,7 @@ void testBuildExceptionMessage () {
     }
     check(false);
   } catch (const exception &e) {
-    u8string wholeMsg = buildExceptionMessage(e, false);
+    u8string wholeMsg = createExceptionMessage(e, false);
     check(u8string(u8("jk.")), wholeMsg);
   } catch (...) {
     check(false);

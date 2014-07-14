@@ -413,7 +413,7 @@ namespace core {
 /**
   Builds an integer with the bottom {@p index} bits set.
 */
-template<typename _i> _i buildBitmask (iu index) noexcept;
+template<typename _i> _i createBitmask (iu index) noexcept;
 /**
   Treats bit {@p index} in {@p value} (which must be zero
   above {@p index}) as a two's-complement sign bit and sign extends
@@ -546,12 +546,12 @@ class UException : public virtual std::exception {
   a sub-message starts with '_', it is elided and the following character is
   never capitalised.
 */
-u8string buildExceptionMessage (const std::exception &rootException, bool capitaliseHead);
+u8string createExceptionMessage (const std::exception &rootException, bool capitaliseHead);
 
 /**
   An exception type that uses only a user-readable string to express its cause.
   It is expected that the message should be of format compatible with
-  ::buildExceptionMessage().
+  ::createExceptionMessage().
 */
 class PlainException : public virtual UException {
   prv const char8_t *const literalMsg;
