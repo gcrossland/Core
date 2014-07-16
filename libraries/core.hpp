@@ -60,53 +60,24 @@ extern const Version VERSION;
 #endif
 
 /* -----------------------------------------------------------------------------
-   Decomposition of pre-built platform names
------------------------------------------------------------------------------ */
-/**
-  @def OS_RISCOS
-  @def OS_DOS
-  @def OS_WIN32
-  @def ARCH_ARM
-  @def ARCH_ARM_STRONG
-  @def ARCH_IA
-  @def ARCH_IA_32
-*/
-
-// Break down the platform types into their component OS types and processor
-// types (and subtypes). If no platform is specified, default to ANSI.
-// TODO include abi/compiler?
-
-#ifdef RISCOS_ARM
-#define OS_RISCOS
-#define ARCH_ARM
-#endif
-
-#ifdef RISCOS_ARM_STRONG
-#define OS_RISCOS
-#define ARCH_ARM_STRONG
-#endif
-
-#ifdef DOS_IA_32
-#define OS_DOS
-#define ARCH_IA_32
-#endif
-
-#ifdef WIN32_IA_32
-#define OS_WIN32
-#define ARCH_IA_32
-#endif
-
-#ifdef ARCH_ARM_STRONG
-#define ARCH_ARM
-#endif
-
-#ifdef ARCH_IA_32
-#define ARCH_IA
-#endif
-
-/* -----------------------------------------------------------------------------
    Configurations for platforms
 ----------------------------------------------------------------------------- */
+#if defined(OS_RISCOS) + defined(OS_DOS) + defined(OS_WIN32) != 1
+#error Exactly one OS_* value must be set
+#endif
+
+#if defined(ARCH_ARM_32) + defined(ARCH_X86_32) != 1
+#error Exactly one ARCH_* value must be set
+#endif
+
+#ifdef ARCH_ARM_32
+#define ARCH_ARM
+#endif
+
+#ifdef ARCH_X86_32
+#define ARCH_X86
+#endif
+
 /**
   @def ARCH_ENDIAN_BIG, ARCH_ENDIAN_LITTLE
   Specifies the endianness of the architecture.
@@ -154,7 +125,7 @@ extern const Version VERSION;
 #define ARCH_SIGNEDRIGHTSHIFT_ARITH
 #endif
 
-#ifdef ARCH_IA
+#ifdef ARCH_X86
 #define ARCH_ENDIAN_LITTLE
 #define ARCH_TWOCINTS
 #define ARCH_SIGNEDRIGHTSHIFT_ARITH
@@ -169,7 +140,7 @@ extern const Version VERSION;
 #error Exactly one of ARCH_SIGNEDRIGHTSHIFT_LOG and ARCH_SIGNEDRIGHTSHIFT_ARITH must be set
 #endif
 
-#ifdef ARCH_ARM
+#ifdef ARCH_ARM_32
 typedef unsigned long long iu64f;
 typedef signed long long is64f;
 typedef unsigned int iu32f;
@@ -197,7 +168,7 @@ typedef f64f f64;
 typedef f32f f32;
 #endif
 
-#ifdef ARCH_IA
+#ifdef ARCH_X86_32
 typedef unsigned long long iu64f;
 typedef signed long long is64f;
 typedef unsigned int iu32f;
