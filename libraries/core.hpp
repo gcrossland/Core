@@ -478,9 +478,28 @@ namespace core {
 /**
   Instances hold a sequence of 0 or more values of a POD type.
 */
-template <typename _c> class string : public std::basic_string<_c> {
-  pub template <typename ..._Ts> string (_Ts... ts);
+template<typename _c> class string :
+  public std::basic_string<_c> // DODGY not really
+{
+  pub template<typename ..._Ts> string (_Ts... ts);
+  /**
+    Constructs an empty string with capacity at least the specified value.
+   */
+  pub explicit string (typename string<_c>::size_type capacity);
 
+  /**
+    @param pos (in [0, ::size()))
+   */
+  pub typename string<_c>::reference operator[] (typename string<_c>::size_type pos);
+  /**
+    @param pos (in [0, ::size()))
+   */
+  pub typename string<_c>::const_reference operator[] (typename string<_c>::size_type pos) const;
+  /**
+    Appends the specified number of characters of unspecified value to the
+    string.
+   */
+  pub void append_any (typename string<_c>::size_type count);
   /**
     Resizes the string to contain the specified number of characters. If the size
     increases, additional characters of unspecified value are appended.
