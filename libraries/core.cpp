@@ -137,10 +137,9 @@ DC();
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 noreturn void dieHard () noexcept {
-  volatile int i = 0;
-  int x = 0 / (i - i);
-
-  exit(EXIT_FAILURE + static_cast<int>(x - x));
+  void *n = malloc(numeric_limits<size_t>::max() - 2);
+  unsigned int i = reinterpret_cast<unsigned int>(n);
+  exit(EXIT_FAILURE + static_cast<int>(1 / i));
 }
 
 noreturn void dieHard (const char *msg) noexcept {
