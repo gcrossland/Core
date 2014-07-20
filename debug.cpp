@@ -7,10 +7,10 @@ using std::get;
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 void testDebugLoggingToStdout () {
-  #ifndef NDEBUG
   auto result = rerun(__FUNCTION__ + 4);
   core::check(0, get<0>(result));
 
+  #ifndef NDEBUG
   const vector<std::string> &stderrLines = get<1>(result);
   const vector<std::string> expectedLines{
     "line 100",
@@ -94,7 +94,13 @@ void testDebugLoggingToStdout () {
   #endif
 }
 
-void testSimpleNesting (int lnPrefix, core::debug::Logger &__dl_A, core::debug::Logger &__dl_B) {
+#ifndef NDEBUG
+typedef core::debug::Logger Logger_;
+#else
+typedef bool Logger_;
+#endif
+
+void testSimpleNesting (int lnPrefix, Logger_ &__dl_A, Logger_ &__dl_B) {
   DW(A, "line ", lnPrefix, "00");
   DW(B, "line ", lnPrefix, "01");
 
@@ -135,7 +141,9 @@ void testDebugLoggingToStdoutImpl () {
   testSimpleNesting(0, __dl_A, __dl_B);
 
   // Test two loggers, one open to an stderr Stream.
+  #ifndef NDEBUG
   std::shared_ptr<core::debug::Stream> str0(new core::debug::Stream);
+  #endif
   DOPEN(A, str0);
   testSimpleNesting(1, __dl_A, __dl_B);
 
@@ -144,7 +152,9 @@ void testDebugLoggingToStdoutImpl () {
   testSimpleNesting(2, __dl_A, __dl_B);
 
   // Test two loggers, both open to different stderr Streams.
+  #ifndef NDEBUG
   std::shared_ptr<core::debug::Stream> str1(new core::debug::Stream);
+  #endif
   DOPEN(B, str1);
   testSimpleNesting(3, __dl_A, __dl_B);
 
@@ -182,11 +192,13 @@ void testDebugLoggingToStdoutImpl () {
 }
 
 void testDebugLoggingToFile () {
-  #ifndef NDEBUG
   const char *logLeafName = ".testDebugLoggingToFile_log.txt";
+  remove(logLeafName);
 
   {
+    #ifndef NDEBUG
     DC(A);
+    #endif
     DOPEN(A, std::shared_ptr<core::debug::Stream>(new core::debug::Stream(logLeafName)));
 
     DW(A, "line 00");
@@ -200,6 +212,7 @@ void testDebugLoggingToFile () {
   }
 
   FILE *f = fopen(logLeafName, "r");
+  #ifndef NDEBUG
   core::check(f);
   char bfr[1024];
   size_t charCount = fread(bfr, sizeof(*bfr), sizeof(bfr) / sizeof(*bfr), f);
@@ -207,19 +220,19 @@ void testDebugLoggingToFile () {
   fclose(f);
   remove(logLeafName);
   core::check(std::string("line 00\n>>testDebugLoggingToFile\n  \xEF\xBB\xBFline 01\xEF\xBB\xBF\n<<testDebugLoggingToFile\n"), std::string(bfr, charCount));
+  #else
+  core::check(!f);
   #endif
 }
 
 void testDebugAssertionSuccess () {
-  #ifndef NDEBUG
   DPRE(true);
   DA(true);
-  #endif
 }
 
 void testDebugAssertionFailure0 () {
-  #ifndef NDEBUG
   auto result = rerun(__FUNCTION__ + 4);
+  #ifndef NDEBUG
   core::check(get<0>(result) != 0);
 
   bool foundMessage = false;
@@ -230,6 +243,8 @@ void testDebugAssertionFailure0 () {
     }
   }
   core::check(foundMessage);
+  #else
+  core::check(0, get<0>(result));
   #endif
 }
 
@@ -238,8 +253,8 @@ void testDebugAssertionFailure0Impl () {
 }
 
 void testDebugAssertionFailure1 () {
-  #ifndef NDEBUG
   auto result = rerun(__FUNCTION__ + 4);
+  #ifndef NDEBUG
   core::check(get<0>(result) != 0);
 
   bool foundMessage = false;
@@ -250,6 +265,8 @@ void testDebugAssertionFailure1 () {
     }
   }
   core::check(foundMessage);
+  #else
+  core::check(0, get<0>(result));
   #endif
 }
 

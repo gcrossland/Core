@@ -324,7 +324,7 @@ template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond
 */
 #define DA(...) core::debug::assertImpl(__FILE__, __LINE__, __VA_ARGS__)
 #else
-#define D(L) bool DNAME(L)
+#define DC(L) bool DNAME(L)
 #define DOPEN(L, S)
 #define DCLOSE(L)
 #define DS(L)
