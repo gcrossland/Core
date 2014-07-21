@@ -173,7 +173,7 @@ void createExceptionMessagePart (const std::exception &exception, bool capitalis
     subMsgBegin = reinterpret_cast<const char8_t *>(e->what());
     subMsgEnd = + subMsgBegin + std::char_traits<char>::length(e->what());
     tmp.append(subMsgBegin, subMsgEnd);
-    subMsgBegin = &tmp[0];
+    subMsgBegin = tmp.data();
     subMsgEnd = subMsgBegin + tmp.size();
 
     // We don't know anything about the native character set, so we'll just make

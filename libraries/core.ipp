@@ -355,6 +355,10 @@ template<typename _c> typename string<_c>::const_reference string<_c>::operator[
   return std::basic_string<_c>::operator[](pos);
 }
 
+template<typename _c> _c *string<_c>::data () {
+  return &std::basic_string<_c>::operator[](0);
+}
+
 template<typename _c> void string<_c>::append_any (typename string<_c>::size_type count) {
   this->append(count, 0x58);
 }

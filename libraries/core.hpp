@@ -496,6 +496,15 @@ template<typename _c> class string :
    */
   pub typename string<_c>::const_reference operator[] (typename string<_c>::size_type pos) const;
   /**
+    Returns a pointer to the underlying array (so that
+    {@c this->data() + a == &this[a]}). The values in
+    [{@c this->data()}, {@c this->data() + this->size()}) are pointers valid for
+    dereferencing; {@c this->data() + this->size()} is a pointer not necessarily
+    valid for dereferencing (and, if it happens to be so valid, the value of such is
+    undefined). Otherwise as std::basic_string::data().
+   */
+  pub _c *data ();
+  /**
     Appends the specified number of characters of unspecified value to the
     string.
    */
