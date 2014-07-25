@@ -1,10 +1,10 @@
 # CMD_RM CMD_MKDIR CMD_CP LIBCACHEDIR CONFIG FLAGS
 CORE_MAJ=1
 CORE_MIN=0
-LIBS=
+REQUIRED_LIBS=
 
-LIBFLAGS::=$(foreach o,$(LIBS),-I$(LIBCACHEDIR)/$(o)/include) $(foreach o,$(LIBS),-L$(LIBCACHEDIR)/$(o)/lib-$(CONFIG)) $(foreach o,$(shell parselibs libnames $(LIBS)),-l$(o))
-DEPENDENCIESFLAGS::=-DDEPENDENCIES="$(shell parselibs dependenciesdefn $(LIBS))"
+AVAILABLE_LIBS::=$(shell parselibs availablelibs $(REQUIRED_LIBS))
+LIBFLAGS::=$(foreach o,$(AVAILABLE_LIBS),-I$(LIBCACHEDIR)/$(o)/include) $(foreach o,$(AVAILABLE_LIBS),-L$(LIBCACHEDIR)/$(o)/lib-$(CONFIG)) $(foreach o,$(shell parselibs libnames $(AVAILABLE_LIBS)),-l$(o))
 
 core: core.exe
 
@@ -21,7 +21,7 @@ o:
 CORE_HDRS=libraries/core.hpp libraries/core.ipp libraries/core.using $(CORE_SUB_HDRS)
 
 o/core.o: libraries/core.cpp $(CORE_HDRS) | o
-	gcc $(FLAGS) $(LIBFLAGS) $(DEPENDENCIESFLAGS) -DLIB_MAJ=$(CORE_MAJ) -DLIB_MIN=$(CORE_MIN) -x c++ -c $< -o $@
+	gcc $(FLAGS) $(LIBFLAGS) -DLIB_MAJ=$(CORE_MAJ) -DLIB_MIN=$(CORE_MIN) -DDEPENDENCIES="$(shell parselibs dependenciesdefn $(AVAILABLE_LIBS))" -x c++ -c $< -o $@
 
 CORE_OBJS=o/core.o $(patsubst libraries/core_%.cpp,o/core_%.o,$(wildcard libraries/core_*.cpp))
 

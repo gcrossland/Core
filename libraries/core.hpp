@@ -22,7 +22,7 @@ struct Version {
 
 void checkVersionImpl (const char *requirer, const char *requiree, Version required, Version available) noexcept;
 
-#define dependson(LIB, MAJ, MIN) core::checkVersionImpl(__FILE__, #LIB, core::Version{MAJ, MIN}, LIB::VERSION)
+#define _dependson_(LIB, MAJ, MIN) core::checkVersionImpl(__FILE__, #LIB, core::Version{MAJ, MIN}, LIB::VERSION)
 
 extern const Version VERSION;
 
