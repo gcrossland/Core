@@ -495,6 +495,7 @@ template<typename _c> class string :
     @param pos (in [0, ::size()))
    */
   pub typename string<_c>::const_reference operator[] (typename string<_c>::size_type pos) const;
+  using std::basic_string<_c>::data;
   /**
     Returns a pointer to the underlying array (so that
     {@c this->data() + a == &this[a]}). The values in
