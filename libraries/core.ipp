@@ -7,7 +7,7 @@ namespace core {
 #ifndef NDEBUG
 namespace debug {
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) Stream::writeElement (_i value) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void Stream::writeElement (_i value) noexcept {
   if (!handle) dieHard();
 
   const char *f = "%llu";
@@ -19,7 +19,7 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   if (r < 0) dieHard("failed to write to stream\n");
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) Stream::writeElement (_i value) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void Stream::writeElement (_i value) noexcept {
   if (!handle) dieHard();
 
   const char *f = "%lld";
@@ -31,7 +31,7 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   if (r < 0) dieHard("failed to write to stream\n");
 }
 
-template<typename ..._Ts> void Logger::write (_Ts... ts) noexcept {
+template<typename ..._Ts> void Logger::write (_Ts ...ts) noexcept {
   if (!stream) {
     return;
   }
@@ -41,7 +41,7 @@ template<typename ..._Ts> void Logger::write (_Ts... ts) noexcept {
   stream->flush();
 }
 
-template<typename ..._Ts> void Logger::writeLine (_Ts... ts) noexcept {
+template<typename ..._Ts> void Logger::writeLine (_Ts ...ts) noexcept {
   if (!stream) {
     return;
   }
@@ -52,12 +52,12 @@ template<typename ..._Ts> void Logger::writeLine (_Ts... ts) noexcept {
   stream->flush();
 }
 
-template<typename _T0, typename ..._Ts> void Logger::writeElements (_T0 t0, _Ts... ts) noexcept {
+template<typename _T0, typename ..._Ts> void Logger::writeElements (_T0 t0, _Ts ...ts) noexcept {
   stream->writeElement(t0);
   writeElements(ts...);
 }
 
-template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts... ts) noexcept {
+template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts ...ts) noexcept {
   if (!cond) {
     Logger l;
     l.open(std::shared_ptr<Stream>(new Stream));
@@ -151,7 +151,7 @@ template<typename _i> _i sl (_i value, iu sh) noexcept {
 }
 
 #ifdef ARCH_TWOCINTS
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) sr (_i value, iu sh) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i sr (_i value, iu sh) noexcept {
   #ifndef ARCH_OORRIGHTSHIFT
   if (sh >= numeric_limits<_i>::bits) {
     return 0;
@@ -161,7 +161,7 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   return static_cast<_i>(value >> sh);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) sr (_i value, iu sh) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i sr (_i value, iu sh) noexcept {
   #ifndef ARCH_OORRIGHTSHIFT
   if (sh >= numeric_limits<_i>::bits) {
     _i topBit = (value >> (numeric_limits<_i>::bits - 1)) & 0x1;
@@ -177,7 +177,7 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 }
 #endif
 
-template<typename _i> iff(std::is_integral<_i>::value, void) set (iu8f *ptr, _i value) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value)> void set (iu8f *ptr, _i value) noexcept {
   #ifdef ARCH_LOOSEALIGNMENT
   *reinterpret_cast<_i *>(ptr) = value;
   #else
@@ -185,7 +185,7 @@ template<typename _i> iff(std::is_integral<_i>::value, void) set (iu8f *ptr, _i 
   #endif
 }
 
-template<typename _i> iff(std::is_integral<_i>::value, _i) get (const iu8f *ptr) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr) noexcept {
   #ifdef ARCH_LOOSEALIGNMENT
   return *reinterpret_cast<const _i *>(ptr);
   #else
@@ -262,11 +262,11 @@ template<typename _i, bool _useSignedFormat> std::tuple<_i, bool> getIex (const 
   } while (true);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) setIeu (iu8f *&r_ptr, _i value) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (iu8f *&r_ptr, _i value) noexcept {
   setIex<_i, false>(r_ptr, value, false);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) setIes (iu8f *&r_ptr, _i value) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (iu8f *&r_ptr, _i value) noexcept {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
   if (value < 0) {
@@ -279,15 +279,15 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   setIex<decltype(mag), true>(r_ptr, mag, isNegative);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd) {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd) {
   return std::get<0>(getIex<_i, false>(r_ptr, ptrEnd));
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (iu8f *&r_ptr, const iu8f *ptrEnd) {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (iu8f *&r_ptr, const iu8f *ptrEnd) {
   return getIeu<_i>(const_cast<const iu8f *&>(r_ptr), ptrEnd);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (const iu8f *&r_ptr) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (const iu8f *&r_ptr) noexcept {
   try {
     return getIeu<_i>(r_ptr, r_ptr + numeric_limits<_i>::max_ie_octets);
   } catch (...) {
@@ -296,11 +296,11 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   }
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (iu8f *&r_ptr) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (iu8f *&r_ptr) noexcept {
   return getValidIeu<_i>(const_cast<const iu8f *&>(r_ptr));
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (const iu8f *&r_ptr, const iu8f *ptrEnd) {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (const iu8f *&r_ptr, const iu8f *ptrEnd) {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
   std::tie(mag, isNegative) = getIex<decltype(mag), true>(r_ptr, ptrEnd);
@@ -317,11 +317,11 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   }
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (iu8f *&r_ptr, const iu8f *ptrEnd) {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (iu8f *&r_ptr, const iu8f *ptrEnd) {
   return getIes<_i>(const_cast<const iu8f *&>(r_ptr), ptrEnd);
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (const iu8f *&r_ptr) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (const iu8f *&r_ptr) noexcept {
   try {
     return getIes<_i>(r_ptr, r_ptr + numeric_limits<_i>::max_ie_octets);
   } catch (...) {
@@ -330,13 +330,13 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   }
 }
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (iu8f *&r_ptr) noexcept {
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (iu8f *&r_ptr) noexcept {
   return getValidIes<_i>(const_cast<const iu8f *&>(r_ptr));
 }
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-template<typename _c> template<typename ..._Ts> string<_c>::string (_Ts... ts) :
+template<typename _c> template<typename ..._Ts> string<_c>::string (_Ts ...ts) :
   std::basic_string<_c>(ts...)
 {
 }

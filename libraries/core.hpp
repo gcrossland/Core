@@ -44,10 +44,15 @@ extern const Version VERSION;
 */
 #define pub public:
 
+namespace core { namespace iff_impl {
+  enum class DummyTemplateParameter {};
+}}
+
 /**
-  Abbreviation for {@c std::enable_if<>::type}.
+  Abbreviation for using {@c std::enable_if<>::type} in place of a template
+  parameter.
 */
-#define iff(...) typename std::enable_if<__VA_ARGS__>::type
+#define iff(...) typename std::enable_if<__VA_ARGS__, core::iff_impl::DummyTemplateParameter>::type...
 
 /**
   Abbreviation for {@c std::throw_with_nested()}.
@@ -226,10 +231,8 @@ template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
 // include support for rendering these and some other primitives to debugging
 // streams.
 
-namespace core {
-
 #ifndef NDEBUG
-namespace debug {
+namespace core { namespace debug {
 
 class Stream {
   prv static const char *const INDENT;
@@ -250,8 +253,8 @@ class Stream {
   pub void flush () noexcept;
   pub void writeElement (const char *value) noexcept;
   pub void writeElement (const unsigned char *value) noexcept;
-  pub template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) writeElement (_i value) noexcept;
-  pub template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) writeElement (_i value) noexcept;
+  pub template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeElement (_i value) noexcept;
+  pub template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeElement (_i value) noexcept;
 };
 
 class Logger {
@@ -280,18 +283,16 @@ class Logger {
   pub void close () noexcept;
 
   pub ScopeProxy defineScope (const char *scopeName) noexcept;
-  pub template<typename ..._Ts> void write (_Ts... ts) noexcept;
-  pub template<typename ..._Ts> void writeLine (_Ts... ts) noexcept;
-  prv template<typename _T0, typename ..._Ts> void writeElements (_T0 t0, _Ts... ts) noexcept;
+  pub template<typename ..._Ts> void write (_Ts ...ts) noexcept;
+  pub template<typename ..._Ts> void writeLine (_Ts ...ts) noexcept;
+  prv template<typename _T0, typename ..._Ts> void writeElements (_T0 t0, _Ts ...ts) noexcept;
   prv void writeElements () noexcept;
 };
 
-template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts... ts) noexcept;
+template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts ...ts) noexcept;
 
-}
+}}
 #endif
-
-}
 
 #define DNAME(L) __dl_ ## L
 #ifndef NDEBUG
@@ -412,8 +413,8 @@ template<typename _i> _i sl (_i value, iu sh) noexcept;
   @param sh the number of places to shift right by.
   @return value asr sh
 */
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) sr (_i value, iu sh) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) sr (_i value, iu sh) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i sr (_i value, iu sh) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i sr (_i value, iu sh) noexcept;
 
 // These allow writing of integer types to octet arrays of arbitrary alignment,
 // using the local platform's integer representation format (i.e. giving the
@@ -422,24 +423,24 @@ template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 /**
   Writes a value of type {@p _i} to the given octet array.
 */
-template<typename _i> iff(std::is_integral<_i>::value, void) set (iu8f *ptr, _i value) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value)> void set (iu8f *ptr, _i value) noexcept;
 /**
   Reads a value of type {@p _i} from the given octet array.
 */
-template<typename _i> iff(std::is_integral<_i>::value, _i) get (const iu8f *ptr) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr) noexcept;
 
 // ... and a platform-independent variable-length format.
 
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, void) setIeu (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, void) setIes (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (const iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value, _i) getValidIeu (iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (const iu8f *&r_ptr) noexcept;
-template<typename _i> iff(std::is_integral<_i>::value && std::is_signed<_i>::value, _i) getValidIes (iu8f *&r_ptr) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (iu8f *&r_ptr, _i value) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (iu8f *&r_ptr, _i value) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (const iu8f *&r_ptr) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (iu8f *&r_ptr) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (const iu8f *&r_ptr) noexcept;
+template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (iu8f *&r_ptr) noexcept;
 
 }
 
@@ -481,7 +482,7 @@ namespace core {
 template<typename _c> class string :
   public std::basic_string<_c> // DODGY not really
 {
-  pub template<typename ..._Ts> string (_Ts... ts);
+  pub template<typename ..._Ts> string (_Ts ...ts);
   /**
     Constructs an empty string with capacity at least the specified value.
    */
