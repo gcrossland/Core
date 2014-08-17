@@ -195,7 +195,7 @@ template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr)
   #endif
 }
 
-template<typename _i, bool _useSignedFormat> void setIex (iu8f *&r_ptr, _i value, bool isNegative) noexcept {
+template<typename _i, typename _OutputIterator, bool _useSignedFormat> void setIex (_OutputIterator &r_ptr, _i value, bool isNegative) noexcept {
   DS();
   DSPRE(std::is_integral<_i>::value && std::is_unsigned<_i>::value, "_i must be an unsigned type");
   DW(, "writing ", value, " - signed? ", _useSignedFormat, " - negative? ", isNegative);
@@ -211,24 +211,24 @@ template<typename _i, bool _useSignedFormat> void setIex (iu8f *&r_ptr, _i value
       return;
     }
 
-    *(r_ptr++) = (static_cast<iu8f>(value) & 0x7F) | 0x80;
+    iu8f octet = static_cast<iu8f>((static_cast<iu8f>(value) & 0x7F) | 0x80);
+    *(r_ptr++) = octet;
     value = static_cast<_i>(value >> 7);
-    DW(, "next octet is ", *(r_ptr - 1), " - remainder of value is ", value);
+    DW(, "next octet is ", octet, " - remainder of value is ", value);
   } while (true);
 }
 
-template<typename _i, bool _useSignedFormat> std::tuple<_i, bool> getIex (const iu8f *&r_ptr, const iu8f *ptrEnd)
+template<typename _i, typename _InputIterator, bool _useEndPtr, bool _useSignedFormat> std::tuple<_i, bool> getIex (_InputIterator &r_ptr, const _InputIterator &ptrEnd)
 {
   DS();
   DSPRE(std::is_integral<_i>::value && std::is_unsigned<_i>::value, "_i must be an unsigned type");
-  DPRE(r_ptr <= ptrEnd);
   DW(, "reading ", _useSignedFormat ? "signed" : "unsigned", " value");
 
   _i value = 0;
   iu valueIndex = 0;
 
   do {
-    if (r_ptr == ptrEnd) {
+    if (_useEndPtr && r_ptr == ptrEnd) {
       DW(, "ran out of buffer just before reading");
       throw PlainException(u8string(_useSignedFormat ? u8("signed") : u8("unsigned")) + u8(" external integer was truncated"));
     }
@@ -262,11 +262,11 @@ template<typename _i, bool _useSignedFormat> std::tuple<_i, bool> getIex (const 
   } while (true);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (iu8f *&r_ptr, _i value) noexcept {
-  setIex<_i, false>(r_ptr, value, false);
+template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (_OutputIterator &r_ptr, _i value) noexcept {
+  setIex<_i, _OutputIterator, false>(r_ptr, value, false);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (iu8f *&r_ptr, _i value) noexcept {
+template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (_OutputIterator &r_ptr, _i value) noexcept {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
   if (value < 0) {
@@ -276,34 +276,33 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::val
     mag = static_cast<decltype(mag)>(value);
     isNegative = false;
   }
-  setIex<decltype(mag), true>(r_ptr, mag, isNegative);
+  setIex<decltype(mag), _OutputIterator, true>(r_ptr, mag, isNegative);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd) {
-  return std::get<0>(getIex<_i, false>(r_ptr, ptrEnd));
+template<typename _i, typename _InputIterator, bool _useEndPtr> _i getIeuImpl (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
+  return std::get<0>(getIex<_i, _InputIterator, _useEndPtr, false>(r_ptr, ptrEnd));
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (iu8f *&r_ptr, const iu8f *ptrEnd) {
-  return getIeu<_i>(const_cast<const iu8f *&>(r_ptr), ptrEnd);
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getIeu (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
+  return getIeuImpl<_i, _InputIterator, true>(r_ptr, ptrEnd);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (const iu8f *&r_ptr) noexcept {
-  try {
-    return getIeu<_i>(r_ptr, r_ptr + numeric_limits<_i>::max_ie_octets);
-  } catch (...) {
-    DA(false, "value out of range");
-    return 0;
-  }
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getValidIeu (_InputIterator &r_ptr) noexcept {
+  return getIeuImpl<_i, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (iu8f *&r_ptr) noexcept {
-  return getValidIeu<_i>(const_cast<const iu8f *&>(r_ptr));
-}
-
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (const iu8f *&r_ptr, const iu8f *ptrEnd) {
+template<typename _i, typename _InputIterator, bool _useEndPtr> _i getIesImpl (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
-  std::tie(mag, isNegative) = getIex<decltype(mag), true>(r_ptr, ptrEnd);
+  std::tie(mag, isNegative) = getIex<decltype(mag), _InputIterator, _useEndPtr, true>(r_ptr, ptrEnd);
   if (isNegative) {
     if (mag > static_cast<decltype(mag)>(-numeric_limits<_i>::min())) {
       throw std::overflow_error("signed external integer had too big a negative value");
@@ -317,21 +316,20 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   }
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (iu8f *&r_ptr, const iu8f *ptrEnd) {
-  return getIes<_i>(const_cast<const iu8f *&>(r_ptr), ptrEnd);
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_signed<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getIes (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
+  return getIesImpl<_i, _InputIterator, true>(r_ptr, ptrEnd);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (const iu8f *&r_ptr) noexcept {
-  try {
-    return getIes<_i>(r_ptr, r_ptr + numeric_limits<_i>::max_ie_octets);
-  } catch (...) {
-    DA(false, "value out of range");
-    return 0;
-  }
-}
-
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (iu8f *&r_ptr) noexcept {
-  return getValidIes<_i>(const_cast<const iu8f *&>(r_ptr));
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_signed<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getValidIes (_InputIterator &r_ptr) noexcept {
+  return getIesImpl<_i, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
 /* -----------------------------------------------------------------------------

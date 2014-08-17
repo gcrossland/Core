@@ -431,16 +431,29 @@ template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr)
 
 // ... and a platform-independent variable-length format.
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (iu8f *&r_ptr, _i value) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getIeu (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (const iu8f *&r_ptr) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i getValidIeu (iu8f *&r_ptr) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (const iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getIes (iu8f *&r_ptr, const iu8f *ptrEnd);
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (const iu8f *&r_ptr) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i getValidIes (iu8f *&r_ptr) noexcept;
+// TODO: validate _OutputIterator
+template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void setIeu (_OutputIterator &r_ptr, _i value) noexcept;
+template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void setIes (_OutputIterator &r_ptr, _i value) noexcept;
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getIeu (_InputIterator &r_ptr, const _InputIterator &ptrEnd);
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getValidIeu (_InputIterator &r_ptr) noexcept;
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_signed<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getIes (_InputIterator &r_ptr, const _InputIterator &ptrEnd);
+template<typename _i, typename _InputIterator, iff(
+  std::is_integral<_i>::value && std::is_signed<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i getValidIes (_InputIterator &r_ptr) noexcept;
 
 }
 
