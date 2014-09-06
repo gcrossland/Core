@@ -24,12 +24,12 @@ def main (args):
           "using core::set;\n" +
           "using core::get;\n" +
           "using std::unique_ptr;\n" +
-          "using core::setIeu;\n" +
-          "using core::getIeu;\n" +
-          "using core::getValidIeu;\n" +
-          "using core::setIes;\n" +
-          "using core::getIes;\n" +
-          "using core::getValidIes;\n" +
+          "using core::writeIeu;\n" +
+          "using core::readIeu;\n" +
+          "using core::readValidIeu;\n" +
+          "using core::writeIes;\n" +
+          "using core::readIes;\n" +
+          "using core::readValidIes;\n" +
           "\n" +
           "void testCreateBitmask () {\n")
 
@@ -240,7 +240,7 @@ def main (args):
               "      if (inWritingRange) {\n" +
               "        iu8f b[16];\n" +
               "        iu8f *bi = b;\n" +
-              "        setIe" + typeSgn + "(bi, value);\n" +
+              "        writeIe" + typeSgn + "(bi, value);\n" +
               "        check(iexSize, bi - b);\n" +
               "        check(0, memcmp(iex, b, iexSize));\n" +
               "      }\n" +
@@ -253,24 +253,24 @@ def main (args):
       f.write("      if (inReadingRange) {\n" +
               "        iu8f *b = iex;\n" +
               "        iu8f *bi = b;\n" +
-              "        check(value, getIe" + typeSgn + "<" + type + ">(bi, bi + iexSize));\n" +
+              "        check(value, readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize));\n" +
               "        check(iexSize, bi - b);\n" +
               "        bi = b;\n" +
-              "        check(value, getIe" + typeSgn + "<" + type + ">(bi, bi + iexSize + 1));\n" +
+              "        check(value, readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize + 1));\n" +
               "        check(iexSize, bi - b);\n" +
               "        try {\n" +
               "          bi = b;\n" +
-              "          getIe" + typeSgn + "<" + type + ">(bi, bi + iexSize - 1);\n" +
+              "          readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize - 1);\n" +
               "          check(false);\n" +
               "        } catch (...) {\n" +
               "        }\n" +
               "        bi = b;\n" +
-              "        check(value, getValidIe" + typeSgn + "<" + type + ">(bi));\n" +
+              "        check(value, readValidIe" + typeSgn + "<" + type + ">(bi));\n" +
               "        check(iexSize, bi - b);\n" +
               "      } else   if (iex == valueDatum.ieu.get())      {\n" +
               "        try {\n" +
               "          iu8f *bi = iex;\n" +
-              "          getIe" + typeSgn + "<" + type + ">(bi, bi + 1000);\n" +
+              "          readIe" + typeSgn + "<" + type + ">(bi, bi + 1000);\n" +
               "          check(false);\n" +
               "        } catch (...) {\n" +
               "        }\n" +
