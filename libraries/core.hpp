@@ -502,6 +502,13 @@ template<typename _c> class string :
     Constructs an empty string with capacity at least the specified value.
    */
   pub explicit string (typename string<_c>::size_type capacity);
+  /**
+    Copy constructs a string (leaving it without excess capacity).
+   */
+  pub string (const string<_c> &o);
+  pub string<_c> &operator= (const string<_c> &) = default;
+  pub string (string<_c> &&o);
+  pub string<_c> &operator= (string<_c> &&) = default;
 
   /**
     @param pos (in [0, ::size()))

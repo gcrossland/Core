@@ -347,6 +347,13 @@ template<typename _c> string<_c>::string (typename string<_c>::size_type capacit
   this->reserve(capacity);
 }
 
+template<typename _c> string<_c>::string (const string<_c> &o) : string<_c>(o.size()) {
+  this->append(o);
+}
+
+template<typename _c> string<_c>::string (string<_c> &&o) : std::basic_string<_c>(move(o)) {
+}
+
 template<typename _c> typename string<_c>::reference string<_c>::operator[] (typename string<_c>::size_type pos) {
   DPRE(pos < this->size());
   return std::basic_string<_c>::operator[](pos);
