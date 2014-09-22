@@ -8,7 +8,9 @@ namespace core {
 namespace debug {
 
 template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void Stream::writeElement (_i value) noexcept {
-  if (!handle) dieHard();
+  if (!handle) {
+    dieHard();
+  }
 
   const char *f = "%llu";
   #ifdef OS_WIN32
@@ -16,11 +18,15 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   f = "%I64u";
   #endif
   int r = fprintf(handle, f, static_cast<unsigned long long>(value));
-  if (r < 0) dieHard("failed to write to stream\n");
+  if (r < 0) {
+    dieHard("failed to write to stream\n");
+  }
 }
 
 template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void Stream::writeElement (_i value) noexcept {
-  if (!handle) dieHard();
+  if (!handle) {
+    dieHard();
+  }
 
   const char *f = "%lld";
   #ifdef OS_WIN32
@@ -28,7 +34,9 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::val
   f = "%I64d";
   #endif
   int r = fprintf(handle, f, static_cast<signed long long>(value));
-  if (r < 0) dieHard("failed to write to stream\n");
+  if (r < 0) {
+    dieHard("failed to write to stream\n");
+  }
 }
 
 template<typename ..._Ts> void Logger::write (_Ts ...ts) noexcept {
@@ -218,8 +226,7 @@ template<typename _i, typename _OutputIterator, bool _useSignedFormat> void writ
   } while (true);
 }
 
-template<typename _i, typename _InputIterator, bool _validate, bool _useSignedFormat> std::tuple<_i, bool> readIex (_InputIterator &r_ptr, const _InputIterator &ptrEnd)
-{
+template<typename _i, typename _InputIterator, bool _validate, bool _useSignedFormat> std::tuple<_i, bool> readIex (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
   DS();
   DSPRE(std::is_integral<_i>::value && std::is_unsigned<_i>::value, "_i must be an unsigned type");
   DW(, "reading ", _useSignedFormat ? "signed" : "unsigned", " value");

@@ -24,7 +24,9 @@ Stream::Stream () noexcept : handle(stderr), indentCount(0), atStartOfLine(true)
 }
 
 Stream::Stream (const char *filename) noexcept : indentCount(0), atStartOfLine(true) {
-  if (!filename) dieHard();
+  if (!filename) {
+    dieHard();
+  }
 
   handle = fopen(filename, "wb");
   if (!handle) {
@@ -45,7 +47,10 @@ void Stream::enterScope () noexcept {
 }
 
 void Stream::exitScope () noexcept {
-  if (indentCount == 0) dieHard();
+  if (indentCount == 0) {
+    dieHard();
+  }
+
   --indentCount;
 }
 
@@ -71,7 +76,9 @@ void Stream::flush () noexcept {
 
 void Stream::writeElement (const char *value) noexcept {
   int r = fputs(value, handle);
-  if (r < 0) dieHard("failed to write to stream\n");
+  if (r < 0) {
+    dieHard("failed to write to stream\n");
+  }
 }
 
 void Stream::writeElement (const char8_t *value) noexcept {
@@ -87,7 +94,9 @@ void Stream::writeElement (const char8_t *value) noexcept {
 Logger::ScopeProxy::ScopeProxy (Logger &logger, const char *scopeName) noexcept :
   stream(logger.stream), scopeName(scopeName)
 {
-  if (!scopeName) dieHard();
+  if (!scopeName) {
+    dieHard();
+  }
 
   if (stream) {
     writeMarker(true);
