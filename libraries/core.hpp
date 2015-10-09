@@ -264,7 +264,7 @@ class Logger {
 
     prv ScopeProxy (Logger &logger, const char *scopeName) noexcept;
     ScopeProxy (const ScopeProxy &) = delete;
-    pub ScopeProxy (ScopeProxy &&scopeProxy) = default;
+    pub ScopeProxy (ScopeProxy &&) = default;
     pub ~ScopeProxy () noexcept;
     prv void writeMarker (bool entering) noexcept;
 
@@ -497,7 +497,7 @@ namespace core {
 template<typename _c> class string :
   public std::basic_string<_c> // DODGY not really
 {
-  pub template<typename ..._Ts> string (_Ts ...ts);
+  pub template<typename ..._Ts> string (_Ts &&...ts);
   /**
     Constructs an empty string with capacity at least the specified value.
    */
@@ -506,8 +506,9 @@ template<typename _c> class string :
     Copy constructs a string (leaving it without excess capacity).
    */
   pub string (const string<_c> &o);
+  pub string (string<_c> &o);
   pub string<_c> &operator= (const string<_c> &) = default;
-  pub string (string<_c> &&o);
+  pub string (string<_c> &&) = default;
   pub string<_c> &operator= (string<_c> &&) = default;
 
   /**

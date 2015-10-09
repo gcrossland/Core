@@ -345,8 +345,8 @@ template<typename _i, typename _InputIterator, iff(
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-template<typename _c> template<typename ..._Ts> string<_c>::string (_Ts ...ts) :
-  std::basic_string<_c>(ts...)
+template<typename _c> template<typename ..._Ts> string<_c>::string (_Ts &&...ts) :
+  std::basic_string<_c>(std::forward<_Ts>(ts)...)
 {
 }
 
@@ -358,7 +358,7 @@ template<typename _c> string<_c>::string (const string<_c> &o) : string<_c>(o.si
   this->append(o);
 }
 
-template<typename _c> string<_c>::string (string<_c> &&o) : std::basic_string<_c>(move(o)) {
+template<typename _c> string<_c>::string (string<_c> &o) : string<_c>(static_cast<const string<_c> &>(o)) {
 }
 
 template<typename _c> typename string<_c>::reference string<_c>::operator[] (typename string<_c>::size_type pos) {
