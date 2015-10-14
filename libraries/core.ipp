@@ -86,7 +86,7 @@ template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 template<typename _T0, typename _T1> void check (const _T0 &expected, const _T1 &actual) noexcept {
-  if (expected != actual) {
+  if (!(expected == actual)) {
     dieHard("test gave unexpected value\n");
   }
 }
@@ -103,7 +103,7 @@ template<typename _InputIterator0, typename _InputIterator1> void check (_InputI
       break;
     }
 
-    if (*(expectedI++) != *(actualI++)) {
+    if (!(*(expectedI++) == *(actualI++))) {
       fprintf(stderr, "test gave unexpected value (at list index %d)\n", static_cast<int>(count));
       fflush(stderr);
       dieHard();
@@ -341,6 +341,74 @@ template<typename _i, typename _InputIterator, iff(
   noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
 )> _i readValidIes (_InputIterator &r_ptr) noexcept {
   return readIesImpl<_i, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
+}
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
+template<typename _T> template<typename ..._Ts> SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(o.hashSlow())) :
+  o(std::forward<_Ts>(ts)...), h(o.hashSlow())
+{
+}
+
+template<typename _T> SlowHashWrapper<_T>::operator const _T & () const noexcept {
+  return o;
+}
+
+template<typename _T> const _T &SlowHashWrapper<_T>::get () const noexcept {
+  return o;
+}
+
+template<typename _T> _T SlowHashWrapper<_T>::release () && noexcept {
+  return std::move(o);
+}
+
+template<typename _T> size_t SlowHashWrapper<_T>::hash () const noexcept {
+  return h;
+}
+
+template<typename _T> bool operator== (const SlowHashWrapper<_T> &l, const SlowHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get())) {
+  return l.hash() == r.hash() && l.get() == r.get();
+}
+
+template<typename _T> template<typename ..._Ts> FastHashWrapper<_T>::FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...))) :
+  o(std::forward<_Ts>(ts)...)
+{
+}
+
+template<typename _T> FastHashWrapper<_T>::operator const _T & () const noexcept {
+  return o;
+}
+
+template<typename _T> const _T &FastHashWrapper<_T>::get () const noexcept {
+  return o;
+}
+
+template<typename _T> _T FastHashWrapper<_T>::release () && noexcept {
+  return std::move(o);
+}
+
+template<typename _T> size_t FastHashWrapper<_T>::hash () const noexcept {
+  return o.hashFast();
+}
+
+template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get())) {
+  return l.get() == r.get();
+}
+
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
+)> SlowHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+) {
+  return SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o));
+}
+
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashFast())>::value && noexcept(std::declval<const _T>().hashFast()))
+> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+) {
+  return FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o));
 }
 
 /* -----------------------------------------------------------------------------

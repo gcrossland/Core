@@ -47,6 +47,7 @@ int main (int argc, char *argv[]) {
   testShifting();
   testSetAndGet();
   testIex();
+  testHashing();
 
   return 0;
 }

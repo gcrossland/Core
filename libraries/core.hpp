@@ -1,7 +1,7 @@
 /** @file */
 /* -----------------------------------------------------------------------------
    Core Library
-   © Geoff Crossland 1998, 1999, 2003, 2004, 2005, 2007, 2008, 2013, 2014
+   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2015
 ----------------------------------------------------------------------------- */
 #ifndef CORE_ALREADYINCLUDED
 #define CORE_ALREADYINCLUDED
@@ -12,6 +12,7 @@
 #include <memory>
 #include <uchar.h>
 #include <string>
+#include <functional>
 
 namespace core {
 
@@ -460,9 +461,154 @@ template<typename _i, typename _InputIterator, iff(
 }
 
 /* -----------------------------------------------------------------------------
+   Hashing
+----------------------------------------------------------------------------- */
+namespace core {
+
+/**
+  Hashes a sequence of octets.
+*/
+size_t hash (const iu8f *i, const iu8f *end);
+
+/**
+  Instances hold an object and store a hash value for it (from
+  {@c size_t hashSlow () const}) suitable for use by specialisations of
+  std::hash.
+*/
+template<typename _T> class SlowHashWrapper {
+  prv _T o;
+  prv size_t h;
+
+  pub SlowHashWrapper (const SlowHashWrapper<_T> &) = default;
+  pub SlowHashWrapper &operator= (const SlowHashWrapper<_T> &) = default;
+  pub SlowHashWrapper (SlowHashWrapper<_T> &&) = default;
+  pub SlowHashWrapper &operator= (SlowHashWrapper<_T> &&) = default;
+  /**
+    Constructs the wrapped object in-place (by calling the constructor for
+    {@c _T} with the given arguments forwarded) and stores its hash.
+  */
+  pub template<typename ..._Ts> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(o.hashSlow()));
+  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  pub SlowHashWrapper (SlowHashWrapper<_T> &) = default;
+
+  /**
+    Returns a reference to the wrapped object.
+  */
+  pub operator const _T & () const noexcept;
+  /**
+    Returns a reference to the wrapped object.
+  */
+  pub const _T &get () const noexcept;
+  /**
+    Returns an object moved to from the wrapped object.
+  */
+  pub _T release () && noexcept;
+
+  /**
+    Returns the stored hash value of the wrapped object.
+  */
+  pub size_t hash () const noexcept;
+};
+
+/**
+  Compares two SlowHashWrapper instances for equality by their wrapped objects.
+*/
+template<typename _T> bool operator== (const SlowHashWrapper<_T> &l, const SlowHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
+
+/**
+  Instances hold an object and expose a hash value for it (from
+  {@c size_t hashFast () const noexcept}) suitable for use by specialisations of
+  std::hash.
+*/
+template<typename _T> class FastHashWrapper {
+  prv _T o;
+
+  pub FastHashWrapper (const FastHashWrapper<_T> &) = default;
+  pub FastHashWrapper &operator= (const FastHashWrapper<_T> &) = default;
+  pub FastHashWrapper (FastHashWrapper<_T> &&) = default;
+  pub FastHashWrapper &operator= (FastHashWrapper<_T> &&) = default;
+  /**
+    Constructs the wrapped object in-place (by calling the constructor for
+    {@c _T} with the given arguments forwarded).
+  */
+  pub template<typename ..._Ts> explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
+  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  pub FastHashWrapper (FastHashWrapper<_T> &) = default;
+
+  /**
+    Returns a reference to the wrapped object.
+  */
+  pub operator const _T & () const noexcept;
+  /**
+    Returns a reference to the wrapped object.
+  */
+  pub const _T &get () const noexcept;
+  /**
+    Returns an object moved to from the wrapped object.
+  */
+  pub _T release () && noexcept;
+
+  /**
+    Returns the hash value of the wrapped object.
+  */
+  pub size_t hash () const noexcept;
+};
+
+/**
+  Compares two FastHashWrapper instances for equality by their wrapped objects.
+*/
+template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
+
+/**
+  Creates a HashWrapper<> wrapping {@p o}.
+*/
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
+)> SlowHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+);
+/**
+  Creates a HashWrapper<> wrapping {@p o}.
+*/
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashFast())>::value && noexcept(std::declval<const _T>().hashFast()))
+> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+);
+
+/**
+  Instances hold an object and expose a hash value for it suitable for use by
+  specialisations of std::hash.
+*/
+template<typename _T> using HashWrapper = decltype(hashed(std::declval<_T>()));
+
+}
+
+namespace std {
+
+template<typename _T> struct hash<core::SlowHashWrapper<_T>> {
+  typedef _T argument_type;
+  typedef size_t result_type;
+
+  size_t operator() (const core::SlowHashWrapper<_T> &o) const noexcept {
+    return o.hash();
+  }
+};
+
+template<typename _T> struct hash<core::FastHashWrapper<_T>> {
+  typedef _T argument_type;
+  typedef size_t result_type;
+
+  size_t operator() (const core::FastHashWrapper<_T> &o) const noexcept {
+    return o.hash();
+  }
+};
+
+}
+
+/* -----------------------------------------------------------------------------
    Characters
 ----------------------------------------------------------------------------- */
-
 #ifndef __STDC_UTF_32__
 #error __STDC_UTF_32__ is required
 #endif
