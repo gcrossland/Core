@@ -471,10 +471,44 @@ namespace core {
 size_t hash (const iu8f *i, const iu8f *end);
 
 /**
-  Instances hold an object and store a hash value for it (from
-  {@c size_t hashSlow () const}) suitable for use by specialisations of
-  std::hash.
+  Implementation of {@c size_t hashSlow (const _T &)}) that leans on a
+  corresponding member function.
 */
+// TODO move these impls out
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
+)> size_t hashSlow (const _T &o) noexcept(noexcept(o.hashSlow())) {
+  return o.hashSlow();
+}
+/**
+  Implementation of {@c size_t hashFast (const _T &) noexcept}) that leans on a
+  corresponding member function.
+*/
+template<typename _T, iff(
+  std::is_same<size_t, decltype(std::declval<const _T>().hashFast())>::value && noexcept(std::declval<const _T>().hashFast())
+)> size_t hashFast (const _T &o) noexcept {
+  return o.hashFast();
+}
+
+/**
+  Implementation of {@c size_t hashSlow (const std::reference_wrapper<_T> &)})
+  that leans on the referenced object.
+*/
+template<typename _T, iff(
+  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
+)> size_t hashSlow (const std::reference_wrapper<_T> &o) noexcept(noexcept(hashSlow(o.get()))) {
+  return hashSlow(o.get());
+}
+/**
+  Implementation of {@c size_t hashFast (const std::reference_wrapper<_T> &) noexcept})
+  that leans on the referenced object.
+*/
+template<typename _T, iff(
+  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
+)> size_t hashFast (const std::reference_wrapper<_T> &o) noexcept {
+  return hashFast(o.get());
+}
+
 template<typename _T> class SlowHashWrapper {
   prv _T o;
   prv size_t h;
@@ -487,7 +521,7 @@ template<typename _T> class SlowHashWrapper {
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded) and stores its hash.
   */
-  pub template<typename ..._Ts> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(o.hashSlow()));
+  pub template<typename ..._Ts> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
   // TODO restrict the forwarding constructor to the appropriate types and drop this
   pub SlowHashWrapper (SlowHashWrapper<_T> &) = default;
 
@@ -511,15 +545,10 @@ template<typename _T> class SlowHashWrapper {
 };
 
 /**
-  Compares two SlowHashWrapper instances for equality by their wrapped objects.
+  Compares two HashWrapper instances for equality by their wrapped objects.
 */
 template<typename _T> bool operator== (const SlowHashWrapper<_T> &l, const SlowHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
 
-/**
-  Instances hold an object and expose a hash value for it (from
-  {@c size_t hashFast () const noexcept}) suitable for use by specialisations of
-  std::hash.
-*/
 template<typename _T> class FastHashWrapper {
   prv _T o;
 
@@ -555,30 +584,31 @@ template<typename _T> class FastHashWrapper {
 };
 
 /**
-  Compares two FastHashWrapper instances for equality by their wrapped objects.
+  Compares two HashWrapper instances for equality by their wrapped objects.
 */
 template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
 
 /**
-  Creates a HashWrapper<> wrapping {@p o}.
+  Creates a HashWrapper wrapping {@p o}.
 */
 template<typename _T, iff(
-  std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
+  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
 )> SlowHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
   noexcept(SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
 );
 /**
-  Creates a HashWrapper<> wrapping {@p o}.
+  Creates a HashWrapper wrapping {@p o}.
 */
 template<typename _T, iff(
-  std::is_same<size_t, decltype(std::declval<const _T>().hashFast())>::value && noexcept(std::declval<const _T>().hashFast()))
-> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
+)> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
   noexcept(FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
 );
 
 /**
-  Instances hold an object and expose a hash value for it suitable for use by
-  specialisations of std::hash.
+  Instances hold an object and expose a hash value for it (from either
+  {@c size_t hashSlow (const _T &)} or
+  {@c size_t hashFast (const _T &) noexcept}).
 */
 template<typename _T> using HashWrapper = decltype(hashed(std::declval<_T>()));
 

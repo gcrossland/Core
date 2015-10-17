@@ -2,13 +2,17 @@
 #include <algorithm>
 #include <unordered_set>
 
-using std::move;
 using core::check;
 using core::HashWrapper;
+using core::hashSlow;
+using core::hashFast;
+using std::move;
 using core::hashed;
 using std::min;
 using std::vector;
 using std::unordered_set;
+using std::reference_wrapper;
+using std::ref;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
@@ -57,9 +61,9 @@ class SlowlyHashableThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  pub bool operator== (const SlowlyHashableThing &r) const noexcept {
+  friend bool operator== (const SlowlyHashableThing &l, const SlowlyHashableThing &r) noexcept {
     ++cEq;
-    return a == r.a && b == r.b && c == r.c;
+    return l.a == r.a && l.b == r.b && l.c == r.c;
   }
 };
 
@@ -92,9 +96,9 @@ class SlowlyHashableExceptingHashThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  pub bool operator== (const SlowlyHashableExceptingHashThing &r) const noexcept {
+  friend bool operator== (const SlowlyHashableExceptingHashThing &l, const SlowlyHashableExceptingHashThing &r) noexcept {
     ++cEq;
-    return a == r.a && b == r.b && c == r.c;
+    return l.a == r.a && l.b == r.b && l.c == r.c;
   }
 };
 
@@ -127,9 +131,9 @@ class SlowlyHashableExceptingEqThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  pub bool operator== (const SlowlyHashableExceptingEqThing &r) const {
+  friend bool operator== (const SlowlyHashableExceptingEqThing &l, const SlowlyHashableExceptingEqThing &r) {
     ++cEq;
-    return a == r.a && b == r.b && c == r.c;
+    return l.a == r.a && l.b == r.b && l.c == r.c;
   }
 };
 
@@ -162,9 +166,9 @@ class QuicklyHashableThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  pub bool operator== (const QuicklyHashableThing &r) const noexcept {
+  friend bool operator== (const QuicklyHashableThing &l, const QuicklyHashableThing &r) noexcept {
     ++cEq;
-    return a == r.a && b == r.b && c == r.c;
+    return l.a == r.a && l.b == r.b && l.c == r.c;
   }
 };
 
@@ -197,9 +201,9 @@ class QuicklyHashableExceptingEqThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  pub bool operator== (const QuicklyHashableExceptingEqThing &r) const {
+  friend bool operator== (const QuicklyHashableExceptingEqThing &l, const QuicklyHashableExceptingEqThing &r) {
     ++cEq;
-    return a == r.a && b == r.b && c == r.c;
+    return l.a == r.a && l.b == r.b && l.c == r.c;
   }
 };
 
@@ -309,6 +313,104 @@ template<typename _Wrappee, bool _noexceptHash, bool _noexceptEq, bool _cachedHa
   check(cEq != 0);
 }
 
+template<typename _Referent, bool _noexceptHash, bool _noexceptEq, bool _cachedHash, bool _hashingEq> void testReferenceHashing () {
+  typedef reference_wrapper<_Referent> _Wrappee;
+
+  _Referent v0;
+  check((!_cachedHash || _noexceptHash) == noexcept(HashWrapper<_Wrappee>(v0)));
+  r();
+  HashWrapper<_Wrappee> o0(v0);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  _Referent v1(4); // different value, different hash
+  check((!_cachedHash || _noexceptHash) == noexcept(HashWrapper<_Wrappee>(v1)));
+  r();
+  HashWrapper<_Wrappee> o1(v1);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  _Referent v2(2, 1); // different value, same hash
+  check((!_cachedHash || _noexceptHash) == noexcept(HashWrapper<_Wrappee>(v2)));
+  r();
+  HashWrapper<_Wrappee> o2(v2);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  _Referent v3;
+  _Wrappee x(v3);
+  check((!_cachedHash || _noexceptHash) == noexcept(HashWrapper<_Wrappee>(x)));
+  r();
+  HashWrapper<_Wrappee> o3(x);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  _Referent v5;
+  _Wrappee y(v5);
+  check((!_cachedHash || _noexceptHash) == noexcept(hashed(y)));
+  r();
+  auto o5 = hashed(y);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  check(noexcept(HashWrapper<_Wrappee>(o3)));
+  r();
+  HashWrapper<_Wrappee> o7(o3);
+  checkC(0, 0, 0, 0, 0, 0, 0);
+
+  r();
+  check(&o0.get() >= static_cast<void *>(&o0));
+  check(&o0.get() + 1 <= static_cast<void *>(&o0 + 1));
+  check(&o3.get() != &o7.get());
+  check(&o3.get().get() == &o7.get().get());
+  checkC(0, 0, 0, 0, 0, 0, 0);
+
+  r();
+  check(o0.hash() == o0.hash());
+  check(o0.hash() != o1.hash());
+  check(o0.hash() == o2.hash());
+  check(o0.hash() == o3.hash());
+  checkC(0, 0, 0, 0, 0, _cachedHash ? 0 : 8, 0);
+
+  check((_noexceptEq && (!(_hashingEq && !_cachedHash) || _noexceptHash)) == noexcept(o0 == o0));
+  r();
+  check(o0 == o0);
+  checkC(0, 0, 0, 0, 0, _hashingEq && !_cachedHash ? 2 : 0, 1);
+  r();
+  check(!(o0 == o1));
+  checkC(0, 0, 0, 0, 0, _hashingEq && !_cachedHash ? 2 : 0, !_hashingEq);
+  r();
+  check(!(o0 == o2));
+  checkC(0, 0, 0, 0, 0, _hashingEq && !_cachedHash ? 2 : 0, 1);
+  r();
+  check(o0 == o3);
+  checkC(0, 0, 0, 0, 0, _hashingEq && !_cachedHash ? 2 : 0, 1);
+
+  r();
+  _Wrappee z(move(o2).release());
+  checkC(0, 0, 0, 0, 0, 0, 0);
+  check(_Wrappee(v2), z);
+  check(_Wrappee(v2).get(), z.get());
+
+  vector<HashWrapper<_Wrappee>> v;
+  r();
+  v.emplace_back(v1);
+  checkC(0, 0, 0, 0, 0, _cachedHash, 0);
+
+  unordered_set<HashWrapper<_Wrappee>> s;
+  r();
+  s.emplace(v1);
+  checkC(0, 0, 0, 0, 0, 1, 0); // DODGY depends on ins and outs of unordered_set impl
+  r();
+  check(s.find(o0) == s.end());
+  check(s.find(o1) != s.end());
+  if (_cachedHash) { // DODGY depends on ins and outs of unordered_set impl
+    check(cHash == 0);
+  } else {
+    check(cHash != 0);
+  }
+  check(cEq != 0);
+  check(s.find(HashWrapper<_Wrappee>(v0)) == s.end());
+  check(s.find(HashWrapper<_Wrappee>(v1)) != s.end());
+  check(s.find(hashed(ref(v0))) == s.end());
+  check(s.find(hashed(ref(v1))) != s.end());
+}
+
 void testHashing () {
   testValueHashing<SlowlyHashableThing, true, true, true, true>();
   testValueHashing<SlowlyHashableExceptingHashThing, false, true, true, true>();
@@ -320,6 +422,17 @@ void testHashing () {
   check(sizeof(HashWrapper<SlowlyHashableThing>) >= sizeof(HashWrapper<QuicklyHashableThing>));
   testValueHashing<QuicklyHashableExceptingEqThing, true, false, false, false>();
   check(sizeof(HashWrapper<QuicklyHashableThing>) == sizeof(HashWrapper<QuicklyHashableExceptingEqThing>));
+
+  testReferenceHashing<SlowlyHashableThing, true, true, true, true>();
+  testReferenceHashing<SlowlyHashableExceptingHashThing, false, true, true, true>();
+  check(sizeof(HashWrapper<reference_wrapper<SlowlyHashableThing>>) == sizeof(HashWrapper<reference_wrapper<SlowlyHashableExceptingHashThing>>));
+  testReferenceHashing<SlowlyHashableExceptingEqThing, true, false, true, true>();
+  check(sizeof(HashWrapper<reference_wrapper<SlowlyHashableThing>>) == sizeof(HashWrapper<reference_wrapper<SlowlyHashableExceptingEqThing>>));
+
+  testReferenceHashing<QuicklyHashableThing, true, true, false, false>();
+  check(sizeof(HashWrapper<reference_wrapper<SlowlyHashableThing>>) >= sizeof(HashWrapper<reference_wrapper<QuicklyHashableThing>>));
+  testReferenceHashing<QuicklyHashableExceptingEqThing, true, false, false, false>();
+  check(sizeof(HashWrapper<reference_wrapper<QuicklyHashableThing>>) == sizeof(HashWrapper<reference_wrapper<QuicklyHashableExceptingEqThing>>));
 }
 
 /* -----------------------------------------------------------------------------
