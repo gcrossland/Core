@@ -589,47 +589,60 @@ template<typename _T> class FastHashWrapper {
 template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
 
 /**
-  Creates a HashWrapper wrapping {@p o}.
-*/
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
-)> SlowHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
-  noexcept(SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
-);
-/**
-  Creates a HashWrapper wrapping {@p o}.
-*/
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
-)> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
-  noexcept(FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
-);
-
-/**
   Instances hold an object and expose a hash value for it (from either
   {@c size_t hashSlow (const _T &)} or
   {@c size_t hashFast (const _T &) noexcept}).
 */
-template<typename _T> using HashWrapper = decltype(hashed(std::declval<_T>()));
+template<typename _T, typename = void> class HashWrapper;
+
+template<typename _T> class HashWrapper<_T, typename std::enable_if<
+  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
+>::type> : public SlowHashWrapper<_T> {
+
+  pub HashWrapper (const HashWrapper &) = default;
+  pub HashWrapper &operator= (const HashWrapper &) = default;
+  pub HashWrapper (HashWrapper &&) = default;
+  pub HashWrapper &operator= (HashWrapper &&) = default;
+  pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(SlowHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
+    SlowHashWrapper<_T>(std::forward<_Ts>(ts)...)
+  {
+  }
+  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  pub HashWrapper (HashWrapper &) = default;
+};
+
+template<typename _T> class HashWrapper<_T, typename std::enable_if<
+  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
+>::type> : public FastHashWrapper<_T> {
+
+  pub HashWrapper (const HashWrapper &) = default;
+  pub HashWrapper &operator= (const HashWrapper &) = default;
+  pub HashWrapper (HashWrapper &&) = default;
+  pub HashWrapper &operator= (HashWrapper &&) = default;
+  pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(FastHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
+    FastHashWrapper<_T>(std::forward<_Ts>(ts)...)
+  {
+  }
+  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  pub HashWrapper (HashWrapper &) = default;
+};
+
+/**
+  Creates a HashWrapper wrapping {@p o}.
+*/
+template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(HashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+);
 
 }
 
 namespace std {
 
-template<typename _T> struct hash<core::SlowHashWrapper<_T>> {
+template<typename _T> struct hash<core::HashWrapper<_T>> {
   typedef _T argument_type;
   typedef size_t result_type;
 
-  size_t operator() (const core::SlowHashWrapper<_T> &o) const noexcept {
-    return o.hash();
-  }
-};
-
-template<typename _T> struct hash<core::FastHashWrapper<_T>> {
-  typedef _T argument_type;
-  typedef size_t result_type;
-
-  size_t operator() (const core::FastHashWrapper<_T> &o) const noexcept {
+  size_t operator() (const core::HashWrapper<_T> &o) const noexcept {
     return o.hash();
   }
 };

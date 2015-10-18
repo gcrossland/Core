@@ -396,20 +396,10 @@ template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastH
   return l.get() == r.get();
 }
 
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
-)> SlowHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
-  noexcept(SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
+template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
+  noexcept(HashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
 ) {
-  return SlowHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o));
-}
-
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
-)> FastHashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
-  noexcept(FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
-) {
-  return FastHashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o));
+  return HashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o));
 }
 
 /* -----------------------------------------------------------------------------

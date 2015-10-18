@@ -4,8 +4,6 @@
 
 using core::check;
 using core::HashWrapper;
-using core::hashSlow;
-using core::hashFast;
 using std::move;
 using core::hashed;
 using std::min;
@@ -311,6 +309,10 @@ template<typename _Wrappee, bool _noexceptHash, bool _noexceptEq, bool _cachedHa
     check(cHash != 0);
   }
   check(cEq != 0);
+  check(s.find(HashWrapper<_Wrappee>()) == s.end());
+  check(s.find(HashWrapper<_Wrappee>(4)) != s.end());
+  check(s.find(hashed(_Wrappee())) == s.end());
+  check(s.find(hashed(_Wrappee(4))) != s.end());
 }
 
 template<typename _Referent, bool _noexceptHash, bool _noexceptEq, bool _cachedHash, bool _hashingEq> void testReferenceHashing () {
