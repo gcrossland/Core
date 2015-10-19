@@ -313,6 +313,22 @@ template<typename _Wrappee, bool _noexceptHash, bool _noexceptEq, bool _cachedHa
   check(s.find(HashWrapper<_Wrappee>(4)) != s.end());
   check(s.find(hashed(_Wrappee())) == s.end());
   check(s.find(hashed(_Wrappee(4))) != s.end());
+
+  unordered_set<reference_wrapper<HashWrapper<_Wrappee>>> rs;
+  r();
+  rs.emplace(ref(o1));
+  checkC(0, 0, 0, 0, 0, !_cachedHash, 0); // DODGY depends on ins and outs of unordered_set impl
+  r();
+  check(rs.find(ref(o0)) == rs.end());
+  check(rs.find(ref(o1)) != rs.end());
+  if (_cachedHash) { // DODGY depends on ins and outs of unordered_set impl
+    check(cHash == 0);
+  } else {
+    check(cHash != 0);
+  }
+  check(cEq != 0);
+  check(rs.find(o0) == rs.end());
+  check(rs.find(o1) != rs.end());
 }
 
 template<typename _Referent, bool _noexceptHash, bool _noexceptEq, bool _cachedHash, bool _hashingEq> void testReferenceHashing () {

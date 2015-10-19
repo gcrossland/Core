@@ -637,11 +637,30 @@ template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hash
 namespace std {
 
 template<typename _T> struct hash<core::HashWrapper<_T>> {
-  typedef _T argument_type;
+  typedef core::HashWrapper<_T> argument_type;
   typedef size_t result_type;
 
   size_t operator() (const core::HashWrapper<_T> &o) const noexcept {
     return o.hash();
+  }
+};
+
+template<typename _T> struct hash<std::reference_wrapper<core::HashWrapper<_T>>> {
+  typedef std::reference_wrapper<core::HashWrapper<_T>> argument_type;
+  typedef size_t result_type;
+
+  size_t operator() (const std::reference_wrapper<core::HashWrapper<_T>> &o) const noexcept {
+    return o.get().hash();
+  }
+};
+
+template<typename _T> struct equal_to<std::reference_wrapper<_T>> {
+  typedef std::reference_wrapper<_T> first_argument_type;
+  typedef std::reference_wrapper<_T> second_argument_type;
+  typedef bool result_type;
+
+  bool operator() (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) const noexcept(noexcept(l.get() == r.get())) {
+    return l.get() == r.get();
   }
 };
 
