@@ -442,6 +442,12 @@ template<typename _c> void string<_c>::resize_any (typename string<_c>::size_typ
   this->resize(count, 0x58);
 }
 
+template<typename _c> size_t hashSlow (const string<_c> &o) noexcept {
+  const _c *begin = o.data();
+  const _c *end = begin + o.size();
+  return hash(reinterpret_cast<const iu8f *>(begin), reinterpret_cast<const iu8f *>(end));
+}
+
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
 }

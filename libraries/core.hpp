@@ -468,7 +468,7 @@ namespace core {
 /**
   Hashes a sequence of octets.
 */
-size_t hash (const iu8f *i, const iu8f *end);
+size_t hash (const iu8f *i, const iu8f *end) noexcept;
 
 /**
   Implementation of {@c size_t hashSlow (const _T &)}) that leans on a
@@ -598,7 +598,6 @@ template<typename _T, typename = void> class HashWrapper;
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
 >::type> : public SlowHashWrapper<_T> {
-
   pub HashWrapper (const HashWrapper &) = default;
   pub HashWrapper &operator= (const HashWrapper &) = default;
   pub HashWrapper (HashWrapper &&) = default;
@@ -614,7 +613,6 @@ template<typename _T> class HashWrapper<_T, typename std::enable_if<
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
 >::type> : public FastHashWrapper<_T> {
-
   pub HashWrapper (const HashWrapper &) = default;
   pub HashWrapper &operator= (const HashWrapper &) = default;
   pub HashWrapper (HashWrapper &&) = default;
@@ -729,6 +727,8 @@ template<typename _c> class string :
   */
   pub void resize_any (typename string<_c>::size_type count);
 };
+
+template<typename _c> size_t hashSlow (const string<_c> &o) noexcept;
 
 /**
   Instances hold a sequence of 0 or more valid characters encoded in UTF-8.

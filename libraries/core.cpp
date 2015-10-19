@@ -165,7 +165,7 @@ void check (const bool &cond) noexcept {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-size_t hash (const iu8f *i, const iu8f *end) {
+size_t hash (const iu8f *i, const iu8f *end) noexcept {
   size_t r = 0;
   for (; i != end; ++i) {
     r = 31 * r + *i;
