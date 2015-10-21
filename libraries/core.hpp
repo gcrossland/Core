@@ -60,11 +60,6 @@ namespace core { namespace iff_impl {
 */
 #define nthrow(E) std::throw_with_nested(E)
 
-#define noreturn [[noreturn]]
-#ifdef CDT
-#define noreturn
-#endif
-
 /* -----------------------------------------------------------------------------
    Configurations for platforms
 ----------------------------------------------------------------------------- */
@@ -358,8 +353,8 @@ extern DC();
 ----------------------------------------------------------------------------- */
 namespace core {
 
-noreturn void dieHard () noexcept;
-noreturn void dieHard (const char *msg) noexcept;
+[[noreturn]] void dieHard () noexcept;
+[[noreturn]] void dieHard (const char *msg) noexcept;
 /**
   Checks that {@p cond} is {@c true}.
 */

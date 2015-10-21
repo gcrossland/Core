@@ -145,13 +145,13 @@ DC();
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-noreturn void dieHard () noexcept {
+[[noreturn]] void dieHard () noexcept {
   void *n = malloc(numeric_limits<size_t>::max() - 2);
   unsigned int i = reinterpret_cast<unsigned int>(n);
   exit(EXIT_FAILURE + static_cast<int>(1 / i));
 }
 
-noreturn void dieHard (const char *msg) noexcept {
+[[noreturn]] void dieHard (const char *msg) noexcept {
   fputs(msg, stderr);
   fflush(stderr);
   dieHard();

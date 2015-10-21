@@ -4,11 +4,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-#endif
-
 namespace core {
 
 // Since the namespace core is often accessed via using directive, we want to
 // keep it as free of clutter as possible, so we don't bring anything else in.
 
 }
+
+#endif
