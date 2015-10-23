@@ -631,6 +631,15 @@ template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hash
 
 namespace std {
 
+template<typename _T> struct hash<const _T> {
+  typedef const _T argument_type;
+  typedef size_t result_type;
+
+  size_t operator() (const _T &o) const noexcept {
+    return std::hash<_T>()(o);
+  }
+};
+
 template<typename _T> struct hash<core::HashWrapper<_T>> {
   typedef core::HashWrapper<_T> argument_type;
   typedef size_t result_type;
