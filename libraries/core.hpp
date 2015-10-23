@@ -640,12 +640,12 @@ template<typename _T> struct hash<core::HashWrapper<_T>> {
   }
 };
 
-template<typename _T> struct hash<std::reference_wrapper<core::HashWrapper<_T>>> {
-  typedef std::reference_wrapper<core::HashWrapper<_T>> argument_type;
+template<typename _T> struct hash<std::reference_wrapper<_T>> {
+  typedef std::reference_wrapper<_T> argument_type;
   typedef size_t result_type;
 
-  size_t operator() (const std::reference_wrapper<core::HashWrapper<_T>> &o) const noexcept {
-    return o.get().hash();
+  size_t operator() (const std::reference_wrapper<_T> &o) const noexcept {
+    return std::hash<_T>()(o.get());
   }
 };
 
