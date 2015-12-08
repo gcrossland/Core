@@ -14,13 +14,7 @@ int main (int argc, char *argv[]) {
 
   if (argc == 2) {
     char *arg = argv[1];
-    if (strcmp(arg, "VersionFailure0") == 0) {
-      testVersionFailure0Impl();
-    } else if (strcmp(arg, "VersionFailure1") == 0) {
-      testVersionFailure1Impl();
-    } else if (strcmp(arg, "VersionFailure2") == 0) {
-      testVersionFailure2Impl();
-    } else if (strcmp(arg, "DebugLoggingToStdout") == 0) {
+    if (strcmp(arg, "DebugLoggingToStdout") == 0) {
       testDebugLoggingToStdoutImpl();
     } else if (strcmp(arg, "DebugAssertionFailure0") == 0) {
       testDebugAssertionFailure0Impl();
@@ -30,10 +24,6 @@ int main (int argc, char *argv[]) {
     return 0;
   }
 
-  testVersionSuccess();
-  testVersionFailure0();
-  testVersionFailure1();
-  testVersionFailure2();
   testIntegers();
   testDebugLoggingToStdout();
   testDebugLoggingToFile();

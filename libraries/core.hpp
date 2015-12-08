@@ -14,20 +14,9 @@
 #include <string>
 #include <functional>
 
-namespace core {
-
-struct Version {
-  unsigned int major;
-  unsigned int minor;
-};
-
-void checkVersionImpl (const char *requirer, const char *requiree, Version required, Version available) noexcept;
-
-#define _dependson_(LIB, MAJ, MIN) core::checkVersionImpl(__FILE__, #LIB, core::Version{MAJ, MIN}, LIB::VERSION)
-
-extern const Version VERSION;
-
-}
+#define _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) _ ## LIB ## _ ## MAJ ## _ ## MIN ## _
+#define _version_(LIB, MAJ, MIN) extern const bool _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) = false;
+#define _dependson_(LIB, MAJ, MIN) extern const bool _VERSION_EXPORT_NAME_(LIB, MAJ, MIN); static const bool _dep_ ## LIB ## _ = _VERSION_EXPORT_NAME_(LIB, MAJ, MIN);
 
 /* -----------------------------------------------------------------------------
    Abbreviations
@@ -63,7 +52,7 @@ namespace core { namespace iff_impl {
 /* -----------------------------------------------------------------------------
    Configurations for platforms
 ----------------------------------------------------------------------------- */
-#if defined(OS_RISCOS) + defined(OS_DOS) + defined(OS_WIN32) != 1
+#if defined(OS_RISCOS) + defined(OS_WIN32) + defined(OS_POSIX) != 1
 #error Exactly one OS_* value must be set
 #endif
 

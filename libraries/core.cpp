@@ -1,17 +1,10 @@
 #include "core.hpp"
+
+LIB_DEPENDENCIES
+
 #include "core.using"
 
 namespace core {
-
-void checkVersionImpl (const char *requirer, const char *requiree, Version required, Version available) noexcept {
-  if (required.major != available.major || required.minor != available.minor) {
-    fprintf(stderr, "The build of %s requires %s %u.%u, but %u.%u is present\n", requirer, requiree, required.major, required.minor, available.major, available.minor);
-    fflush(stderr);
-    dieHard();
-  }
-}
-
-const Version VERSION{LIB_MAJ, LIB_MIN}; DEPENDENCIES;
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
