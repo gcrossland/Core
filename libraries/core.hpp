@@ -56,7 +56,7 @@ namespace core { namespace iff_impl {
 #error Exactly one OS_* value must be set
 #endif
 
-#if defined(ARCH_ARM_32) + defined(ARCH_X86_32) != 1
+#if defined(ARCH_ARM_32) + defined(ARCH_ARM_64) + defined(ARCH_X86_32) + defined(ARCH_X86_64) != 1
 #error Exactly one ARCH_* value must be set
 #endif
 
@@ -64,7 +64,15 @@ namespace core { namespace iff_impl {
 #define ARCH_ARM
 #endif
 
+#ifdef ARCH_ARM_64
+#define ARCH_ARM
+#endif
+
 #ifdef ARCH_X86_32
+#define ARCH_X86
+#endif
+
+#ifdef ARCH_X86_64
 #define ARCH_X86
 #endif
 
@@ -75,13 +83,11 @@ namespace core { namespace iff_impl {
   @def ARCH_TWOCINTS
   Specifies that signed integers are represented in two's complement.
 
-  @def ARCH_OORLEFTSHIFT
-  Specifies that left shifts of count greater than or equal to the number of
-  bits in the source variable type are sane.
+  @def ARCH_MAXLEFTSHIFT
+  Specifies the maximum valid left shift count.
 
-  @def ARCH_OORRIGHTSHIFT
-  Specifies that right shifts of count greater than or equal to the number of
-  bits in the source variable type are sane.
+  @def ARCH_MAXRIGHTSHIFT
+  Specifies the maximum valid right shift count.
 
   @def ARCH_SIGNEDRIGHTSHIFT_LOG, ARCH_SIGNEDRIGHTSHIFT_ARITH
   Specifies that right shifts of signed integers are logical or arithmetic.
@@ -110,9 +116,14 @@ namespace core { namespace iff_impl {
 #define ARCH_ENDIAN_LITTLE
 #endif
 #define ARCH_TWOCINTS
-#define ARCH_OORLEFTSHIFT
-#define ARCH_OORRIGHTSHIFT
+#ifdef ARCH_ARM_32
+#define ARCH_MAXLEFTSHIFT 255
+#define ARCH_MAXRIGHTSHIFT 255
+#endif
 #define ARCH_SIGNEDRIGHTSHIFT_ARITH
+#ifdef ARCH_ARM_64
+#define ARCH_LOOSEALIGNMENT
+#endif
 #endif
 
 #ifdef ARCH_X86
@@ -130,7 +141,7 @@ namespace core { namespace iff_impl {
 #error Exactly one of ARCH_SIGNEDRIGHTSHIFT_LOG and ARCH_SIGNEDRIGHTSHIFT_ARITH must be set
 #endif
 
-#ifdef ARCH_ARM_32
+#ifdef ARCH_ARM
 typedef unsigned long long iu64f;
 typedef signed long long is64f;
 typedef unsigned int iu32f;
@@ -158,7 +169,7 @@ typedef f64f f64;
 typedef f32f f32;
 #endif
 
-#ifdef ARCH_X86_32
+#ifdef ARCH_X86
 typedef unsigned long long iu64f;
 typedef signed long long is64f;
 typedef unsigned int iu32f;

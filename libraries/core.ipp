@@ -149,33 +149,39 @@ template<typename _i> iu getLowestSetBit (_i value) noexcept {
 }
 
 template<typename _i> _i sl (_i value, iu sh) noexcept {
-  #ifndef ARCH_OORLEFTSHIFT
-  if (sh >= numeric_limits<_i>::bits) {
+  iu shMax = numeric_limits<_i>::bits - 1;
+  #ifdef ARCH_MAXLEFTSHIFT
+  shMax = ARCH_MAXLEFTSHIFT;
+  #endif
+  if (sh > shMax) {
     return 0;
   }
-  #endif
 
   return static_cast<_i>(value << sh);
 }
 
 #ifdef ARCH_TWOCINTS
 template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i sr (_i value, iu sh) noexcept {
-  #ifndef ARCH_OORRIGHTSHIFT
-  if (sh >= numeric_limits<_i>::bits) {
+  iu shMax = numeric_limits<_i>::bits - 1;
+  #ifdef ARCH_MAXRIGHTSHIFT
+  shMax = ARCH_MAXRIGHTSHIFT;
+  #endif
+  if (sh > shMax) {
     return 0;
   }
-  #endif
 
   return static_cast<_i>(value >> sh);
 }
 
 template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i sr (_i value, iu sh) noexcept {
-  #ifndef ARCH_OORRIGHTSHIFT
-  if (sh >= numeric_limits<_i>::bits) {
+  iu shMax = numeric_limits<_i>::bits - 1;
+  #ifdef ARCH_MAXRIGHTSHIFT
+  shMax = ARCH_MAXRIGHTSHIFT;
+  #endif
+  if (sh > shMax) {
     _i topBit = (value >> (numeric_limits<_i>::bits - 1)) & 0x1;
     return static_cast<_i>(~(topBit - 1));
   }
-  #endif
 
   #ifdef ARCH_SIGNEDRIGHTSHIFT_ARITH
   return static_cast<_i>(value >> sh);

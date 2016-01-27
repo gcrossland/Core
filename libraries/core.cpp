@@ -140,7 +140,7 @@ DC();
 ----------------------------------------------------------------------------- */
 [[noreturn]] void dieHard () noexcept {
   void *n = malloc(numeric_limits<size_t>::max() - 2);
-  unsigned int i = reinterpret_cast<unsigned int>(n);
+  auto i = reinterpret_cast<size_t>(n);
   exit(EXIT_FAILURE + static_cast<int>(1 / i));
 }
 
