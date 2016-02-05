@@ -193,14 +193,14 @@ void createExceptionMessagePart (const std::exception &exception, bool capitalis
     // sensible comes out.
     for (char8_t &c : tmp) {
       if (c < 32 || c >= 128) {
-        c = U'?';
+        c = u8("?")[0];
       }
     }
   }
   // TODO if the message doesn't look like a sentence (e.g. has no spaces in), stop here? (and hoist putting the . on the end)
 
   bool headIsCapitalisable = capitaliseHead;
-  if (subMsgBegin != subMsgEnd && *subMsgBegin == U'_') {
+  if (subMsgBegin != subMsgEnd && *subMsgBegin == u8("_")[0]) {
     headIsCapitalisable = false;
     ++subMsgBegin;
   }
@@ -256,7 +256,7 @@ PlainException PlainException::create (const char8_t *msgTemplate) {
   const char8_t *i = msgTemplate;
   char8_t c;
   while ((c = *(i++)) != 0) {
-    if (c == '%') {
+    if (c == u8("%")[0]) {
       --i;
 
       u8string msg(msgTemplate, i);
@@ -271,13 +271,13 @@ PlainException PlainException::create (const char8_t *msgTemplate) {
 void PlainException::interpolate (const char8_t *msgTemplate, u8string &r_out) {
   char8_t c;
   while ((c = *(msgTemplate++)) != 0) {
-    if (c == '%') {
+    if (c == u8("%")[0]) {
       c = *msgTemplate;
       if (c != 0) {
         ++msgTemplate;
         switch (c) {
-          case '%':
-            r_out.push_back('%');
+          case U'%':
+            r_out.push_back(u8("%")[0]);
             break;
           default:
             break;

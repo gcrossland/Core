@@ -1,7 +1,7 @@
 /** @file */
 /* -----------------------------------------------------------------------------
    Core Library
-   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2015
+   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2016
 ----------------------------------------------------------------------------- */
 #ifndef CORE_ALREADYINCLUDED
 #define CORE_ALREADYINCLUDED
@@ -228,6 +228,8 @@ template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
 // streams.
 
 #ifndef NDEBUG
+class char8_t;
+
 namespace core { namespace debug {
 
 class Stream {
@@ -248,7 +250,7 @@ class Stream {
   pub void endLine () noexcept;
   pub void flush () noexcept;
   pub void writeElement (const char *value) noexcept;
-  pub void writeElement (const unsigned char *value) noexcept;
+  pub void writeElement (const char8_t *value) noexcept;
   pub template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeElement (_i value) noexcept;
   pub template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeElement (_i value) noexcept;
 };
@@ -684,20 +686,72 @@ template<typename _T> struct equal_to<std::reference_wrapper<_T>> {
 /**
   A type for storing UTF-8 code units.
 */
-typedef unsigned char char8_t;
+class char8_t {
+  prv iu8f v;
+
+  pub char8_t () = default;
+  pub char8_t (const char8_t &) = default;
+  pub char8_t &operator= (const char8_t &) = default;
+  pub char8_t (char8_t &&) = default;
+  pub char8_t &operator= (char8_t &&) = default;
+
+  pub constexpr explicit char8_t (iu8f v) : v(v) {
+  }
+
+  pub constexpr operator iu8f () const {
+    return v;
+  }
+
+  friend bool operator== (const char8_t &o0, const char8_t &o1) {
+    return o0.v == o1.v;
+  }
+
+  friend bool operator!= (const char8_t &o0, const char8_t &o1) {
+    return o0.v != o1.v;
+  }
+
+  friend bool operator< (const char8_t &o0, const char8_t &o1) {
+    return o0.v < o1.v;
+  }
+
+  friend bool operator> (const char8_t &o0, const char8_t &o1) {
+    return o0.v > o1.v;
+  }
+
+  friend bool operator<= (const char8_t &o0, const char8_t &o1) {
+    return o0.v <= o1.v;
+  }
+
+  friend bool operator>= (const char8_t &o0, const char8_t &o1) {
+    return o0.v >= o1.v;
+  }
+
+  pub static constexpr char8_t __convertLiteral (char c) {
+    return char8_t(static_cast<iu8f>(c));
+  }
+
+  pub static constexpr const char8_t *__convertLiteral (const char *s) {
+    return reinterpret_cast<const char8_t *>(s);
+  }
+
+  #ifdef CDT
+  pub static constexpr char8_t __convertLiteral (char16_t c);
+  pub static constexpr const char8_t *__convertLiteral (const char16_t *s);
+  #endif
+};
 /**
   The standard non-fixed type for holding Unicode code points.
 */
 typedef iu32 uchar;
 
 /**
-  Creates a UTF-8 string literal of char8_ts.
+  Used to create a UTF-8 string or character literal of char8_ts.
 */
-#define u8(S) reinterpret_cast<const char8_t *>(u8"" S)
+#define u8(S) char8_t::__convertLiteral(u8 ## S)
 /**
-  Creates a UTF-32 string literal of char32_ts.
+  Used to create a UTF-32 string or character literal of char32_ts.
 */
-#define u32(S) (U"" S)
+#define u32(S) (U ## S)
 
 namespace core {
 

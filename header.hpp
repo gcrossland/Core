@@ -36,6 +36,7 @@ void testShifting ();
 void testSetAndGet ();
 void testIex ();
 void testHashing ();
+void testUnicodeCodeUnits ();
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */

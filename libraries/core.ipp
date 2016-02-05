@@ -441,11 +441,11 @@ template<typename _c> _c *string<_c>::data () {
 }
 
 template<typename _c> void string<_c>::append_any (typename string<_c>::size_type count) {
-  this->append(count, 0x58);
+  this->append(count, static_cast<_c>(0x58));
 }
 
 template<typename _c> void string<_c>::resize_any (typename string<_c>::size_type count) {
-  this->resize(count, 0x58);
+  this->resize(count, static_cast<_c>(0x58));
 }
 
 template<typename _c> size_t hashSlow (const string<_c> &o) noexcept {

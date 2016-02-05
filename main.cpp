@@ -38,6 +38,7 @@ int main (int argc, char *argv[]) {
   testSetAndGet();
   testIex();
   testHashing();
+  testUnicodeCodeUnits();
 
   return 0;
 }
