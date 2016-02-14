@@ -262,7 +262,9 @@ class Logger {
 
     prv ScopeProxy (Logger &logger, const char *scopeName) noexcept;
     ScopeProxy (const ScopeProxy &) = delete;
+    ScopeProxy &operator= (const ScopeProxy &) = delete;
     pub ScopeProxy (ScopeProxy &&) = default;
+    ScopeProxy &operator= (ScopeProxy &&) = delete;
     pub ~ScopeProxy () noexcept;
     prv void writeMarker (bool entering) noexcept;
 
@@ -510,17 +512,17 @@ template<typename _T> class SlowHashWrapper {
   prv _T o;
   prv size_t h;
 
-  pub SlowHashWrapper (const SlowHashWrapper<_T> &) = default;
-  pub SlowHashWrapper &operator= (const SlowHashWrapper<_T> &) = default;
-  pub SlowHashWrapper (SlowHashWrapper<_T> &&) = default;
-  pub SlowHashWrapper &operator= (SlowHashWrapper<_T> &&) = default;
   /**
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded) and stores its hash.
   */
   pub template<typename ..._Ts> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
-  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  // TODO restrict the forwarding constructor to the appropriate types and drop these
   pub SlowHashWrapper (SlowHashWrapper<_T> &) = default;
+  pub SlowHashWrapper (const SlowHashWrapper<_T> &) = default;
+  pub SlowHashWrapper &operator= (const SlowHashWrapper<_T> &) = default;
+  pub SlowHashWrapper (SlowHashWrapper<_T> &&) = default;
+  pub SlowHashWrapper &operator= (SlowHashWrapper<_T> &&) = default;
 
   /**
     Returns a reference to the wrapped object.
@@ -549,17 +551,17 @@ template<typename _T> bool operator== (const SlowHashWrapper<_T> &l, const SlowH
 template<typename _T> class FastHashWrapper {
   prv _T o;
 
-  pub FastHashWrapper (const FastHashWrapper<_T> &) = default;
-  pub FastHashWrapper &operator= (const FastHashWrapper<_T> &) = default;
-  pub FastHashWrapper (FastHashWrapper<_T> &&) = default;
-  pub FastHashWrapper &operator= (FastHashWrapper<_T> &&) = default;
   /**
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded).
   */
   pub template<typename ..._Ts> explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
-  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  // TODO restrict the forwarding constructor to the appropriate types and drop these
   pub FastHashWrapper (FastHashWrapper<_T> &) = default;
+  pub FastHashWrapper (const FastHashWrapper<_T> &) = default;
+  pub FastHashWrapper &operator= (const FastHashWrapper<_T> &) = default;
+  pub FastHashWrapper (FastHashWrapper<_T> &&) = default;
+  pub FastHashWrapper &operator= (FastHashWrapper<_T> &&) = default;
 
   /**
     Returns a reference to the wrapped object.
@@ -595,31 +597,31 @@ template<typename _T, typename = void> class HashWrapper;
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
 >::type> : public SlowHashWrapper<_T> {
-  pub HashWrapper (const HashWrapper &) = default;
-  pub HashWrapper &operator= (const HashWrapper &) = default;
-  pub HashWrapper (HashWrapper &&) = default;
-  pub HashWrapper &operator= (HashWrapper &&) = default;
   pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(SlowHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
     SlowHashWrapper<_T>(std::forward<_Ts>(ts)...)
   {
   }
-  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  // TODO restrict the forwarding constructor to the appropriate types and drop these
   pub HashWrapper (HashWrapper &) = default;
+  pub HashWrapper (const HashWrapper &) = default;
+  pub HashWrapper &operator= (const HashWrapper &) = default;
+  pub HashWrapper (HashWrapper &&) = default;
+  pub HashWrapper &operator= (HashWrapper &&) = default;
 };
 
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
 >::type> : public FastHashWrapper<_T> {
-  pub HashWrapper (const HashWrapper &) = default;
-  pub HashWrapper &operator= (const HashWrapper &) = default;
-  pub HashWrapper (HashWrapper &&) = default;
-  pub HashWrapper &operator= (HashWrapper &&) = default;
   pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(FastHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
     FastHashWrapper<_T>(std::forward<_Ts>(ts)...)
   {
   }
-  // TODO restrict the forwarding constructor to the appropriate types and drop this
+  // TODO restrict the forwarding constructor to the appropriate types and drop these
   pub HashWrapper (HashWrapper &) = default;
+  pub HashWrapper (const HashWrapper &) = default;
+  pub HashWrapper &operator= (const HashWrapper &) = default;
+  pub HashWrapper (HashWrapper &&) = default;
+  pub HashWrapper &operator= (HashWrapper &&) = default;
 };
 
 /**
@@ -690,10 +692,6 @@ class char8_t {
   prv iu8f v;
 
   pub char8_t () = default;
-  pub char8_t (const char8_t &) = default;
-  pub char8_t &operator= (const char8_t &) = default;
-  pub char8_t (char8_t &&) = default;
-  pub char8_t &operator= (char8_t &&) = default;
 
   pub constexpr explicit char8_t (iu8f v) : v(v) {
   }
@@ -859,10 +857,6 @@ class PlainException : public virtual UException {
     @param msg the message (valid forever).
   */
   pub explicit PlainException (const char8_t *msg) noexcept;
-  pub PlainException (const PlainException &) = default;
-  pub PlainException &operator= (const PlainException &) = default;
-  pub PlainException (PlainException &&) = default;
-  pub PlainException &operator= (PlainException &&) = default;
 
   /**
     Returns a PlainException with message created by interpolating the given
