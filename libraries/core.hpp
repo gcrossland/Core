@@ -801,9 +801,8 @@ template<typename _c> class string :
     increases, additional characters of unspecified value are appended.
   */
   pub void resize_any (typename string<_c>::size_type count);
+  pub size_t hashSlow () const noexcept;
 };
-
-template<typename _c> size_t hashSlow (const string<_c> &o) noexcept;
 
 /**
   Instances hold a sequence of 0 or more valid characters encoded in UTF-8.
