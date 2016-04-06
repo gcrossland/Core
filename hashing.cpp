@@ -59,9 +59,9 @@ class SlowlyHashableThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  friend bool operator== (const SlowlyHashableThing &l, const SlowlyHashableThing &r) noexcept {
+  pub bool operator== (const SlowlyHashableThing &r) const noexcept {
     ++cEq;
-    return l.a == r.a && l.b == r.b && l.c == r.c;
+    return a == r.a && b == r.b && c == r.c;
   }
 };
 
@@ -94,9 +94,9 @@ class SlowlyHashableExceptingHashThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  friend bool operator== (const SlowlyHashableExceptingHashThing &l, const SlowlyHashableExceptingHashThing &r) noexcept {
+  pub bool operator== (const SlowlyHashableExceptingHashThing &r) const noexcept {
     ++cEq;
-    return l.a == r.a && l.b == r.b && l.c == r.c;
+    return a == r.a && b == r.b && c == r.c;
   }
 };
 
@@ -129,9 +129,9 @@ class SlowlyHashableExceptingEqThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  friend bool operator== (const SlowlyHashableExceptingEqThing &l, const SlowlyHashableExceptingEqThing &r) {
+  pub bool operator== (const SlowlyHashableExceptingEqThing &r) const {
     ++cEq;
-    return l.a == r.a && l.b == r.b && l.c == r.c;
+    return a == r.a && b == r.b && c == r.c;
   }
 };
 
@@ -164,9 +164,9 @@ class QuicklyHashableThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  friend bool operator== (const QuicklyHashableThing &l, const QuicklyHashableThing &r) noexcept {
+  pub bool operator== (const QuicklyHashableThing &r) const noexcept {
     ++cEq;
-    return l.a == r.a && l.b == r.b && l.c == r.c;
+    return a == r.a && b == r.b && c == r.c;
   }
 };
 
@@ -199,9 +199,9 @@ class QuicklyHashableExceptingEqThing {
     return static_cast<size_t>(a * b * c);
   }
 
-  friend bool operator== (const QuicklyHashableExceptingEqThing &l, const QuicklyHashableExceptingEqThing &r) {
+  pub bool operator== (const QuicklyHashableExceptingEqThing &r) const {
     ++cEq;
-    return l.a == r.a && l.b == r.b && l.c == r.c;
+    return a == r.a && b == r.b && c == r.c;
   }
 };
 

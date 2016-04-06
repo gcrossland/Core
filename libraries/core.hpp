@@ -49,6 +49,14 @@ namespace core { namespace iff_impl {
 */
 #define nthrow(E) std::throw_with_nested(E)
 
+/**
+  Abbreviation for noexcept-specification/function-body pairs where the two
+  contain identical expressions (the value of which may or may not be
+  returned).
+*/
+#define noexcept_auto(...) noexcept(noexcept(__VA_ARGS__)) { __VA_ARGS__; }
+#define noexcept_auto_return(...) noexcept(noexcept(__VA_ARGS__)) { return __VA_ARGS__; }
+
 /* -----------------------------------------------------------------------------
    Configurations for platforms
 ----------------------------------------------------------------------------- */
@@ -460,6 +468,81 @@ template<typename _i, typename _InputIterator, iff(
 }
 
 /* -----------------------------------------------------------------------------
+   Equality and order
+----------------------------------------------------------------------------- */
+/**
+  eq operator implementation for objects based on their eq member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator==(std::declval<const _T>()))>::value
+)> bool operator== (const _T &l, const _T &r) noexcept_auto_return(
+  l.operator==(r)
+);
+/**
+  ne operator implementation for objects based on their eq member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator==(std::declval<const _T>()))>::value
+)> bool operator!= (const _T &l, const _T &r) noexcept_auto_return(
+  !l.operator==(r)
+)
+
+/**
+  lt operator implementation for objects based on their lt member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
+)> bool operator< (const _T &l, const _T &r) noexcept_auto_return(
+  l.operator<(r)
+)
+/**
+  gt operator implementation for objects based on their lt member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
+)> bool operator> (const _T &l, const _T &r) noexcept_auto_return(
+  r.operator<(l)
+)
+/**
+  le operator implementation for objects based on their lt member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
+)> bool operator<= (const _T &l, const _T &r) noexcept_auto_return(
+  !r.operator<(l)
+)
+/**
+  ge operator implementation for objects based on their lt member function.
+*/
+template<typename _T, iff(
+  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
+)> bool operator>= (const _T &l, const _T &r) noexcept_auto_return(
+  !l.operator<(r)
+)
+
+// We'll allow reference_wrapper<>ed things to be compared without needing
+// implicit conversion.
+
+template<typename _T> bool operator== (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() == r.get()
+)
+template<typename _T> bool operator!= (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() != r.get()
+)
+template<typename _T> bool operator< (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() < r.get()
+)
+template<typename _T> bool operator> (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() > r.get()
+)
+template<typename _T> bool operator<= (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() <= r.get()
+)
+template<typename _T> bool operator>= (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
+  l.get() >= r.get()
+)
+
+/* -----------------------------------------------------------------------------
    Hashing
 ----------------------------------------------------------------------------- */
 namespace core {
@@ -473,12 +556,11 @@ size_t hash (const iu8f *i, const iu8f *end) noexcept;
   Implementation of {@c size_t hashSlow (const _T &)}) that leans on a
   corresponding member function.
 */
-// TODO move these impls out
 template<typename _T, iff(
   std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
-)> size_t hashSlow (const _T &o) noexcept(noexcept(o.hashSlow())) {
-  return o.hashSlow();
-}
+)> size_t hashSlow (const _T &o) noexcept_auto_return(
+  o.hashSlow()
+)
 /**
   Implementation of {@c size_t hashFast (const _T &) noexcept}) that leans on a
   corresponding member function.
@@ -495,9 +577,9 @@ template<typename _T, iff(
 */
 template<typename _T, iff(
   std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
-)> size_t hashSlow (const std::reference_wrapper<_T> &o) noexcept(noexcept(hashSlow(o.get()))) {
-  return hashSlow(o.get());
-}
+)> size_t hashSlow (const std::reference_wrapper<_T> &o) noexcept_auto_return(
+  hashSlow(o.get())
+)
 /**
   Implementation of {@c size_t hashFast (const std::reference_wrapper<_T> &) noexcept})
   that leans on the referenced object.
@@ -541,12 +623,11 @@ template<typename _T> class SlowHashWrapper {
     Returns the stored hash value of the wrapped object.
   */
   pub size_t hash () const noexcept;
+  /**
+    Compares two instances for equality by their wrapped objects.
+  */
+  pub bool operator== (const SlowHashWrapper<_T> &r) const noexcept(noexcept(r.get() == r.get()));
 };
-
-/**
-  Compares two HashWrapper instances for equality by their wrapped objects.
-*/
-template<typename _T> bool operator== (const SlowHashWrapper<_T> &l, const SlowHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
 
 template<typename _T> class FastHashWrapper {
   prv _T o;
@@ -580,12 +661,11 @@ template<typename _T> class FastHashWrapper {
     Returns the hash value of the wrapped object.
   */
   pub size_t hash () const noexcept;
+  /**
+    Compares two instances for equality by their wrapped objects.
+  */
+  pub bool operator== (const FastHashWrapper<_T> &r) const noexcept(noexcept(r.get() == r.get()));
 };
-
-/**
-  Compares two HashWrapper instances for equality by their wrapped objects.
-*/
-template<typename _T> bool operator== (const FastHashWrapper<_T> &l, const FastHashWrapper<_T> &r) noexcept(noexcept(l.get() == r.get()));
 
 /**
   Instances hold an object and expose a hash value for it (from either
@@ -627,9 +707,9 @@ template<typename _T> class HashWrapper<_T, typename std::enable_if<
 /**
   Creates a HashWrapper wrapping {@p o}.
 */
-template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept(
-  noexcept(HashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o)))
-);
+template<typename _T> HashWrapper<typename std::remove_reference<_T>::type> hashed (_T &&o) noexcept_auto_return(
+  HashWrapper<typename std::remove_reference<_T>::type>(std::forward<_T>(o))
+)
 
 }
 
