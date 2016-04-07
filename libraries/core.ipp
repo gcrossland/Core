@@ -366,12 +366,12 @@ template<typename _T> _T SlowHashWrapper<_T>::release () && noexcept {
   return std::move(o);
 }
 
-template<typename _T> size_t SlowHashWrapper<_T>::hash () const noexcept {
+template<typename _T> size_t SlowHashWrapper<_T>::hashFast () const noexcept {
   return h;
 }
 
 template<typename _T> bool SlowHashWrapper<_T>::operator== (const SlowHashWrapper<_T> &r) const noexcept(noexcept(r.get() == r.get())) {
-  return hash() == r.hash() && get() == r.get();
+  return hashFast() == r.hashFast() && get() == r.get();
 }
 
 template<typename _T> template<typename ..._Ts, iff(
@@ -389,7 +389,8 @@ template<typename _T> _T FastHashWrapper<_T>::release () && noexcept {
   return std::move(o);
 }
 
-template<typename _T> size_t FastHashWrapper<_T>::hash () const noexcept {
+template<typename _T> size_t FastHashWrapper<_T>::hashFast () const noexcept {
+  using core::hashFast;
   DSPRE(noexcept(hashFast(o)), "");
   return hashFast(o);
 }

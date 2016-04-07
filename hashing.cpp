@@ -261,11 +261,11 @@ template<typename _Wrappee, bool _noexceptHash, bool _noexceptEq, bool _cachedHa
   checkC(0, 0, 0, 0, 0, 0, 0);
 
   r();
-  check(o0.hash() == o0.hash());
-  check(o0.hash() != o1.hash());
-  check(o0.hash() == o2.hash());
-  check(o0.hash() == o3.hash());
-  check(o0.hash() == o4.hash());
+  check(o0.hashFast() == o0.hashFast());
+  check(o0.hashFast() != o1.hashFast());
+  check(o0.hashFast() == o2.hashFast());
+  check(o0.hashFast() == o3.hashFast());
+  check(o0.hashFast() == o4.hashFast());
   checkC(0, 0, 0, 0, 0, _cachedHash ? 0 : 10, 0);
 
   check((_noexceptEq && (!(_hashingEq && !_cachedHash) || _noexceptHash)) == noexcept(o0 == o0));
@@ -379,10 +379,10 @@ template<typename _Referent, bool _noexceptHash, bool _noexceptEq, bool _cachedH
   checkC(0, 0, 0, 0, 0, 0, 0);
 
   r();
-  check(o0.hash() == o0.hash());
-  check(o0.hash() != o1.hash());
-  check(o0.hash() == o2.hash());
-  check(o0.hash() == o3.hash());
+  check(o0.hashFast() == o0.hashFast());
+  check(o0.hashFast() != o1.hashFast());
+  check(o0.hashFast() == o2.hashFast());
+  check(o0.hashFast() == o3.hashFast());
   checkC(0, 0, 0, 0, 0, _cachedHash ? 0 : 8, 0);
 
   check((_noexceptEq && (!(_hashingEq && !_cachedHash) || _noexceptHash)) == noexcept(o0 == o0));

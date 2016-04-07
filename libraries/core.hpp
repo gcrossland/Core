@@ -614,7 +614,7 @@ template<typename _T> class SlowHashWrapper {
   /**
     Returns the stored hash value of the wrapped object.
   */
-  pub size_t hash () const noexcept;
+  pub size_t hashFast () const noexcept;
   /**
     Compares two instances for equality by their wrapped objects.
   */
@@ -644,7 +644,7 @@ template<typename _T> class FastHashWrapper {
   /**
     Returns the hash value of the wrapped object.
   */
-  pub size_t hash () const noexcept;
+  pub size_t hashFast () const noexcept;
   /**
     Compares two instances for equality by their wrapped objects.
   */
@@ -695,7 +695,7 @@ template<typename _T> struct hash<core::HashWrapper<_T>> {
   typedef size_t result_type;
 
   size_t operator() (const core::HashWrapper<_T> &o) const noexcept {
-    return o.hash();
+    return o.hashFast();
   }
 };
 
