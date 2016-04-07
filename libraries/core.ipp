@@ -351,13 +351,11 @@ template<typename _i, typename _InputIterator, iff(
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-template<typename _T> template<typename ..._Ts> SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o))) :
+template<typename _T> template<typename ..._Ts, iff(
+  std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
+)> SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o))) :
   o(std::forward<_Ts>(ts)...), h(hashSlow(o))
 {
-}
-
-template<typename _T> SlowHashWrapper<_T>::operator const _T & () const noexcept {
-  return o;
 }
 
 template<typename _T> const _T &SlowHashWrapper<_T>::get () const noexcept {
@@ -376,13 +374,11 @@ template<typename _T> bool SlowHashWrapper<_T>::operator== (const SlowHashWrappe
   return hash() == r.hash() && get() == r.get();
 }
 
-template<typename _T> template<typename ..._Ts> FastHashWrapper<_T>::FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...))) :
+template<typename _T> template<typename ..._Ts, iff(
+  std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
+)> FastHashWrapper<_T>::FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...))) :
   o(std::forward<_Ts>(ts)...)
 {
-}
-
-template<typename _T> FastHashWrapper<_T>::operator const _T & () const noexcept {
-  return o;
 }
 
 template<typename _T> const _T &FastHashWrapper<_T>::get () const noexcept {

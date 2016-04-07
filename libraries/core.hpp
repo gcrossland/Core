@@ -598,18 +598,10 @@ template<typename _T> class SlowHashWrapper {
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded) and stores its hash.
   */
-  pub template<typename ..._Ts> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
-  // TODO restrict the forwarding constructor to the appropriate types and drop these
-  pub SlowHashWrapper (SlowHashWrapper<_T> &) = default;
-  pub SlowHashWrapper (const SlowHashWrapper<_T> &) = default;
-  pub SlowHashWrapper &operator= (const SlowHashWrapper<_T> &) = default;
-  pub SlowHashWrapper (SlowHashWrapper<_T> &&) = default;
-  pub SlowHashWrapper &operator= (SlowHashWrapper<_T> &&) = default;
+  pub template<typename ..._Ts, iff(
+    std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
+  )> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
 
-  /**
-    Returns a reference to the wrapped object.
-  */
-  pub operator const _T & () const noexcept;
   /**
     Returns a reference to the wrapped object.
   */
@@ -636,18 +628,10 @@ template<typename _T> class FastHashWrapper {
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded).
   */
-  pub template<typename ..._Ts> explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
-  // TODO restrict the forwarding constructor to the appropriate types and drop these
-  pub FastHashWrapper (FastHashWrapper<_T> &) = default;
-  pub FastHashWrapper (const FastHashWrapper<_T> &) = default;
-  pub FastHashWrapper &operator= (const FastHashWrapper<_T> &) = default;
-  pub FastHashWrapper (FastHashWrapper<_T> &&) = default;
-  pub FastHashWrapper &operator= (FastHashWrapper<_T> &&) = default;
+  pub template<typename ..._Ts, iff(
+    std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
+  )> explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
 
-  /**
-    Returns a reference to the wrapped object.
-  */
-  pub operator const _T & () const noexcept;
   /**
     Returns a reference to the wrapped object.
   */
@@ -677,31 +661,13 @@ template<typename _T, typename = void> class HashWrapper;
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
 >::type> : public SlowHashWrapper<_T> {
-  pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(SlowHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
-    SlowHashWrapper<_T>(std::forward<_Ts>(ts)...)
-  {
-  }
-  // TODO restrict the forwarding constructor to the appropriate types and drop these
-  pub HashWrapper (HashWrapper &) = default;
-  pub HashWrapper (const HashWrapper &) = default;
-  pub HashWrapper &operator= (const HashWrapper &) = default;
-  pub HashWrapper (HashWrapper &&) = default;
-  pub HashWrapper &operator= (HashWrapper &&) = default;
+  pub using SlowHashWrapper<_T>::SlowHashWrapper;
 };
 
 template<typename _T> class HashWrapper<_T, typename std::enable_if<
   std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
 >::type> : public FastHashWrapper<_T> {
-  pub template<typename ..._Ts> explicit HashWrapper (_Ts &&...ts) noexcept(noexcept(FastHashWrapper<_T>(std::forward<_Ts>(ts)...))) :
-    FastHashWrapper<_T>(std::forward<_Ts>(ts)...)
-  {
-  }
-  // TODO restrict the forwarding constructor to the appropriate types and drop these
-  pub HashWrapper (HashWrapper &) = default;
-  pub HashWrapper (const HashWrapper &) = default;
-  pub HashWrapper &operator= (const HashWrapper &) = default;
-  pub HashWrapper (HashWrapper &&) = default;
-  pub HashWrapper &operator= (HashWrapper &&) = default;
+  pub using FastHashWrapper<_T>::FastHashWrapper;
 };
 
 /**
@@ -861,7 +827,7 @@ template<typename _c> class string :
     @param pos (in [0, ::size()))
    */
   pub typename string<_c>::const_reference operator[] (typename string<_c>::size_type pos) const;
-  using std::basic_string<_c>::data;
+  pub using std::basic_string<_c>::data;
   /**
     Returns a pointer to the underlying array (so that
     {@c this->data() + a == &this[a]}). The values in
