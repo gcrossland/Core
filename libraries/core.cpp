@@ -237,7 +237,10 @@ u8string createExceptionMessage (const std::exception &rootException, bool capit
   try {
     createExceptionMessagePart(rootException, capitaliseHead, out);
   } catch (...) {
-    out = u8("An error occurred (but further detail is unavailable, as an error occurred while composing the message).");
+    out = u8("an error occurred (but further detail is unavailable, as an error occurred while gathering it).");
+    if (capitaliseHead) {
+      out.front() = u8("A")[0];
+    }
   }
 
   return out;
