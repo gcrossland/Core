@@ -714,7 +714,7 @@ template<typename _T> struct equal_to<std::reference_wrapper<_T>> {
   typedef bool result_type;
 
   bool operator() (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) const noexcept(noexcept(l.get() == r.get())) {
-    return l.get() == r.get();
+    return std::equal_to<_T>()(l.get(), r.get());
   }
 };
 
