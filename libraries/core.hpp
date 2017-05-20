@@ -333,16 +333,21 @@ template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond
 */
 #define DWP(L, ...) DNAME(L).write(__VA_ARGS__)
 /**
+  Wraps tokens that will be included only in debug mode.
+*/
+#define DI(...) __VA_ARGS__
+/**
   Validates an assertion.
 */
 #define DA(...) core::debug::assertImpl(__FILE__, __LINE__, __VA_ARGS__)
 #else
 #define DC(L) bool DNAME(L)
-#define DOPEN(L, S)
-#define DCLOSE(L)
+#define DOPEN(L, S) DNAME(L)
+#define DCLOSE(L) DNAME(L)
 #define DS(L)
 #define DW(L, ...)
 #define DWP(L, ...)
+#define DI(...)
 #define DA(...)
 #endif
 /**

@@ -141,9 +141,7 @@ void testDebugLoggingToStdoutImpl () {
   testSimpleNesting(0, __dl_A, __dl_B);
 
   // Test two loggers, one open to an stderr Stream.
-  #ifndef NDEBUG
-  std::shared_ptr<core::debug::Stream> str0(new core::debug::Stream);
-  #endif
+  DI(std::shared_ptr<core::debug::Stream> str0(new core::debug::Stream);)
   DOPEN(A, str0);
   testSimpleNesting(1, __dl_A, __dl_B);
 
@@ -152,9 +150,7 @@ void testDebugLoggingToStdoutImpl () {
   testSimpleNesting(2, __dl_A, __dl_B);
 
   // Test two loggers, both open to different stderr Streams.
-  #ifndef NDEBUG
-  std::shared_ptr<core::debug::Stream> str1(new core::debug::Stream);
-  #endif
+  DI(std::shared_ptr<core::debug::Stream> str1(new core::debug::Stream);)
   DOPEN(B, str1);
   testSimpleNesting(3, __dl_A, __dl_B);
 
@@ -196,9 +192,7 @@ void testDebugLoggingToFile () {
   remove(logLeafName);
 
   {
-    #ifndef NDEBUG
     DC(A);
-    #endif
     DOPEN(A, std::shared_ptr<core::debug::Stream>(new core::debug::Stream(logLeafName)));
 
     DW(A, "line 00");
