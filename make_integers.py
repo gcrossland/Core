@@ -4,6 +4,9 @@ import string
 SGN = ("u", "s")
 LEN = ("64f", "32f", "16f", "8f", "64", "32", "16", "8", "")
 
+def getTypeName (typeSgn, typeLen):
+  return "i" + typeSgn + typeLen
+
 def main (args):
   f = open("integers.cpp", "wb")
 
@@ -18,7 +21,7 @@ def main (args):
 
   for typeSgn in SGN:
     for typeLen in LEN:
-      type = "i" + typeSgn + typeLen
+      type = getTypeName(typeSgn, typeLen)
       f.write("\n" +
               "  // Test " + type + ".\n" +
               "  {\n")
@@ -34,6 +37,15 @@ def main (args):
         f.write("    check(" + typeLen[0:-1] + ", bits);\n")
       else:
         f.write("    check(bits >= " + typeLen + ");\n")
+
+      if not typeLen.endswith("f"):
+        if typeLen == "":
+          otherTypeLens = ("",)
+        else:
+          otherTypeLens = ("64", "32", "16", "8")
+
+        for i in xrange(otherTypeLens.index(typeLen), len(otherTypeLens)):
+          f.write("    check(typeid(" + type + "), typeid(static_cast<" + type + ">(0) + static_cast<" + getTypeName(typeSgn, otherTypeLens[i]) + ">(0)));\n")
 
       f.write("  }\n")
 

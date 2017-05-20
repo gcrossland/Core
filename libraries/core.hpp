@@ -1,7 +1,7 @@
 /** @file */
 /* -----------------------------------------------------------------------------
    Core Library
-   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2016
+   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2017
 ----------------------------------------------------------------------------- */
 #ifndef CORE_ALREADYINCLUDED
 #define CORE_ALREADYINCLUDED
@@ -13,6 +13,7 @@
 #include <uchar.h>
 #include <string>
 #include <functional>
+#include <cstddef>
 
 #define _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) _ ## LIB ## _ ## MAJ ## _ ## MIN ## _
 #define _version_(LIB, MAJ, MIN) extern const bool _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) = false;
@@ -149,9 +150,18 @@ namespace core { namespace iff_impl {
 #error Exactly one of ARCH_SIGNEDRIGHTSHIFT_LOG and ARCH_SIGNEDRIGHTSHIFT_ARITH must be set
 #endif
 
-#ifdef ARCH_ARM
+#ifdef OS_POSIX
+#if defined(ARCH_ARM_32) || defined(ARCH_X86_32)
 typedef unsigned long long iu64f;
 typedef signed long long is64f;
+#else
+typedef unsigned long iu64f;
+typedef signed long is64f;
+#endif
+#else
+typedef unsigned long long iu64f;
+typedef signed long long is64f;
+#endif
 typedef unsigned int iu32f;
 typedef signed int is32f;
 typedef unsigned short iu16f;
@@ -159,6 +169,10 @@ typedef signed short is16f;
 typedef unsigned char iu8f;
 typedef signed char is8f;
 
+typedef double f64f;
+typedef float f32f;
+
+#ifdef ARCH_ARM
 typedef iu64f iu64;
 typedef is64f is64;
 typedef iu32f iu32;
@@ -169,24 +183,12 @@ typedef iu32f iu8;
 typedef is32f is8;
 typedef iu32f iu;
 typedef is32f is;
-
-typedef double f64f;
-typedef float f32f;
 
 typedef f64f f64;
 typedef f32f f32;
 #endif
 
 #ifdef ARCH_X86
-typedef unsigned long long iu64f;
-typedef signed long long is64f;
-typedef unsigned int iu32f;
-typedef signed int is32f;
-typedef unsigned short iu16f;
-typedef signed short is16f;
-typedef unsigned char iu8f;
-typedef signed char is8f;
-
 typedef iu64f iu64;
 typedef is64f is64;
 typedef iu32f iu32;
@@ -197,9 +199,6 @@ typedef iu32f iu8;
 typedef is32f is8;
 typedef iu32f iu;
 typedef is32f is;
-
-typedef double f64f;
-typedef float f32f;
 
 typedef f64f f64;
 typedef f32f f32;
