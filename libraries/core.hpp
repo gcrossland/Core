@@ -10,7 +10,12 @@
 #include <exception>
 #include <limits>
 #include <memory>
-#include <uchar.h>
+#ifdef __GNUC__
+#define __STDC_UTF_32__
+#define __STDC_UTF_16__
+#else
+#include <cuchar>
+#endif
 #include <string>
 #include <functional>
 #include <cstddef>
