@@ -351,6 +351,28 @@ template<typename _i, typename _InputIterator, iff(
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
+template<typename _I> size_t offsetImpl (const _I &first, const _I &last) noexcept(noexcept(last - first)) {
+  DPRE(first <= last, "first must not be after last");
+
+  ptrdiff_t d0 = last - first;
+  DA(d0 >= 0);
+  auto d1 = static_cast<size_t>(d0);
+  DA(d1 == static_cast<typename std::make_unsigned<ptrdiff_t>::type>(d0));
+  return d1;
+}
+
+template<typename _I, iff(
+  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
+)> size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first)) {
+  return offsetImpl(first, last);
+}
+
+template<typename _T> size_t offset (_T *first, _T *last) noexcept {
+  return offsetImpl(first, last);
+}
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
 template<typename _T> template<typename ..._Ts, iff(
   std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
 )> SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o))) :

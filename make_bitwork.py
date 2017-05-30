@@ -24,6 +24,7 @@ def main (args):
           "using core::set;\n" +
           "using core::get;\n" +
           "using std::unique_ptr;\n" +
+          "using core::offset;\n" +
           "using core::writeIeu;\n" +
           "using core::readIeu;\n" +
           "using core::readValidIeu;\n" +
@@ -131,11 +132,12 @@ def main (args):
                 "        check(static_cast<" + type + ">(((value >> i) & srValueMask) | (topBitSet ? ~srValueMask : 0)), sr(value, i));\n")
       f.write("      }\n" +
               "      for (; i != (numeric_limits<" + type + ">::bits + 1); ++i) {\n" +
-              "        check(0, sl(value, i));\n")
+              "        " + type + " zero = 0;\n" +
+              "        check(zero, sl(value, i));\n")
       if typeSgn == "u":
-        f.write("        check(0, sr(value, i));\n")
+        f.write("        check(zero, sr(value, i));\n")
       else:
-        f.write("        check(topBitSet ? createBitmask<" + type + ">(numeric_limits<" + type + ">::bits) : 0, sr(value, i));\n")
+        f.write("        check(topBitSet ? createBitmask<" + type + ">(numeric_limits<" + type + ">::bits) : zero, sr(value, i));\n")
       f.write("      }\n" +
               "    }\n" +
               "  }\n")
@@ -241,7 +243,7 @@ def main (args):
               "        iu8f b[16];\n" +
               "        iu8f *bi = b;\n" +
               "        writeIe" + typeSgn + "(bi, value);\n" +
-              "        check(iexSize, bi - b);\n" +
+              "        check(iexSize, offset(b, bi));\n" +
               "        check(0, memcmp(iex, b, iexSize));\n" +
               "      }\n" +
               "\n")
@@ -254,10 +256,10 @@ def main (args):
               "        iu8f *b = iex;\n" +
               "        iu8f *bi = b;\n" +
               "        check(value, readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize));\n" +
-              "        check(iexSize, bi - b);\n" +
+              "        check(iexSize, offset(b, bi));\n" +
               "        bi = b;\n" +
               "        check(value, readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize + 1));\n" +
-              "        check(iexSize, bi - b);\n" +
+              "        check(iexSize, offset(b, bi));\n" +
               "        try {\n" +
               "          bi = b;\n" +
               "          readIe" + typeSgn + "<" + type + ">(bi, bi + iexSize - 1);\n" +
@@ -266,7 +268,7 @@ def main (args):
               "        }\n" +
               "        bi = b;\n" +
               "        check(value, readValidIe" + typeSgn + "<" + type + ">(bi));\n" +
-              "        check(iexSize, bi - b);\n" +
+              "        check(iexSize, offset(b, bi));\n" +
               "      } else   if (iex == valueDatum.ieu.get())      {\n" +
               "        try {\n" +
               "          iu8f *bi = iex;\n" +

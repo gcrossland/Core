@@ -552,6 +552,33 @@ template<typename _T> bool operator>= (const std::reference_wrapper<_T> &l, cons
 )
 
 /* -----------------------------------------------------------------------------
+   Array utilities
+----------------------------------------------------------------------------- */
+namespace core {
+
+/**
+  Returns the {@c ptrdiff_t} difference between {@p first} and {@p last},
+  where {@c first <= last}, as a {@c size_t}.
+*/
+template<typename _I, iff(
+  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
+)> size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first));
+template<typename _T> size_t offset (_T *first, _T *last) noexcept;
+
+}
+
+/**
+  Implementation of iterator advancement that admits {@c size_t} for {@c ptrdiff_t}.
+*/
+template<typename _I, iff(
+  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
+)> _I operator+ (const _I &i, size_t o) noexcept(noexcept(i + std::declval<ptrdiff_t>())) {
+  DPRE(o <= static_cast<typename std::make_unsigned<ptrdiff_t>::type>(core::numeric_limits<ptrdiff_t>::max())  , "o must be a size");
+
+  return i + static_cast<ptrdiff_t>(o);
+}
+
+/* -----------------------------------------------------------------------------
    Hashing
 ----------------------------------------------------------------------------- */
 namespace core {

@@ -16,14 +16,14 @@ void testExceptions () {
     throw PlainException(u8("cstring message"));
   } catch (UException &e) {
     check(u8string(u8("cstring message")), u8string(e.uWhat()));
-    check(15, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
+    check(15U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 
   try {
     throw PlainException(u8string(u8("string \u00B5essag\u1EB9")));
   } catch (UException &e) {
     check(u8string(u8("string \u00B5essag\u1EB9")), u8string(e.uWhat()));
-    check(17, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
+    check(17U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 
   const char8_t *m0 = u8("another cstring message");
@@ -37,7 +37,7 @@ void testExceptions () {
     throw PlainException::create(u8("\u03B1nother %%\u03C3tring message"));
   } catch (UException &e) {
     check(u8string(u8("\u03B1nother %\u03C3tring message")), u8string(e.uWhat()));
-    check(25, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
+    check(25U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 }
 

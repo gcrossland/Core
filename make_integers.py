@@ -29,7 +29,7 @@ def main (args):
       trait = {"u": "is_unsigned", "s": "is_signed"}[typeSgn]
       f.write("    auto bits = numeric_limits<" + type + ">::bits;\n")
       f.write("    check(std::" + trait + "<" + type + ">::value);\n")
-      f.write("    check(sizeof(" + type + ") * CHAR_BIT, bits);\n")
+      f.write("    check(sizeof(" + type + ") * CHAR_BIT == bits);\n")
 
       if typeLen == "":
         f.write("    check(bits >= numeric_limits<int>::bits); // " + type + " should probably be plain intish\n")

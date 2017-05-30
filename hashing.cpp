@@ -256,8 +256,8 @@ template<typename _Wrappee, bool _noexceptHash, bool _noexceptEq, bool _cachedHa
   checkC(0, 0, 0, 0, 1, 0, 0);
 
   r();
-  check(&o0.get() >= static_cast<void *>(&o0));
-  check(&o0.get() + 1 <= static_cast<void *>(&o0 + 1));
+  check(reinterpret_cast<uintptr_t>(&o0.get()) >= reinterpret_cast<uintptr_t>(&o0));
+  check(reinterpret_cast<uintptr_t>(&o0.get() + 1) <= reinterpret_cast<uintptr_t>(&o0 + 1));
   checkC(0, 0, 0, 0, 0, 0, 0);
 
   r();
@@ -372,8 +372,8 @@ template<typename _Referent, bool _noexceptHash, bool _noexceptEq, bool _cachedH
   checkC(0, 0, 0, 0, 0, 0, 0);
 
   r();
-  check(&o0.get() >= static_cast<void *>(&o0));
-  check(&o0.get() + 1 <= static_cast<void *>(&o0 + 1));
+  check(reinterpret_cast<uintptr_t>(&o0.get()) >= reinterpret_cast<uintptr_t>(&o0));
+  check(reinterpret_cast<uintptr_t>(&o0.get() + 1) <= reinterpret_cast<uintptr_t>(&o0 + 1));
   check(&o3.get() != &o7.get());
   check(&o3.get().get() == &o7.get().get());
   checkC(0, 0, 0, 0, 0, 0, 0);
