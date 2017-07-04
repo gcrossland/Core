@@ -1,4 +1,5 @@
-#include "core.using"
+#include <cstdio>
+#include <cstdlib>
 
 namespace core {
 

@@ -2,8 +2,6 @@
 
 LIB_DEPENDENCIES
 
-#include "core.using"
-
 namespace core {
 
 /* -----------------------------------------------------------------------------
