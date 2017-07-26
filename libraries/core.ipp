@@ -92,7 +92,9 @@ template<typename _T0, typename _T1> void check (const _T0 &expected, const _T1 
   }
 }
 
-template<typename _InputIterator0, typename _InputIterator1> void check (_InputIterator0 expectedI, _InputIterator0 expectedEnd, _InputIterator1 actualI, _InputIterator1 actualEnd) {
+template<
+  typename _InputIterator0, typename _InputEndIterator0, typename _InputIterator1, typename _InputEndIterator1
+> void check (_InputIterator0 expectedI, _InputEndIterator0 expectedEnd, _InputIterator1 actualI, _InputEndIterator1 actualEnd) {
   size_t count = 0;
   while (true) {
     bool expectedEnded = (expectedI == expectedEnd);
@@ -233,7 +235,7 @@ template<typename _i, typename _OutputIterator, bool _useSignedFormat> void writ
   } while (true);
 }
 
-template<typename _i, typename _InputIterator, bool _validate, bool _useSignedFormat> std::tuple<_i, bool> readIex (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
+template<typename _i, typename _InputIterator, typename _InputEndIterator, bool _validate, bool _useSignedFormat> std::tuple<_i, bool> readIex (_InputIterator &r_ptr, _InputEndIterator &ptrEnd) {
   DS();
   DSPRE(std::is_integral<_i>::value && std::is_unsigned<_i>::value, "_i must be an unsigned type");
   DW(, "reading ", _useSignedFormat ? "signed" : "unsigned", " value");
@@ -295,31 +297,31 @@ template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value 
   core::writeIex<decltype(mag), _OutputIterator, true>(r_ptr, mag, isNegative);
 }
 
-template<typename _i, typename _InputIterator, bool _validate> _i readIeuImpl (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
-  return std::get<0>(core::readIex<_i, _InputIterator, _validate, false>(r_ptr, ptrEnd));
+template<typename _i, typename _InputIterator, typename _InputEndIterator, bool _validate> _i readIeuImpl (_InputIterator &r_ptr, _InputEndIterator &ptrEnd) {
+  return std::get<0>(core::readIex<_i, _InputIterator, _InputEndIterator, _validate, false>(r_ptr, ptrEnd));
+}
+
+template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
+  return core::readIeuImpl<_i, _InputIterator, const _InputEndIterator, true>(r_ptr, ptrEnd);
 }
 
 template<typename _i, typename _InputIterator, iff(
   std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
   std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIeu (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
-  return core::readIeuImpl<_i, _InputIterator, true>(r_ptr, ptrEnd);
-}
-
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
   noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
 )> _i readValidIeu (_InputIterator &r_ptr) noexcept {
-  return core::readIeuImpl<_i, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
+  return core::readIeuImpl<_i, _InputIterator, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
-template<typename _i, typename _InputIterator, bool _validate> _i readIesImpl (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
+template<typename _i, typename _InputIterator, typename _InputEndIterator, bool _validate> _i readIesImpl (_InputIterator &r_ptr, _InputEndIterator &ptrEnd) {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
-  std::tie(mag, isNegative) = core::readIex<decltype(mag), _InputIterator, _validate, true>(r_ptr, ptrEnd);
+  std::tie(mag, isNegative) = core::readIex<decltype(mag), _InputIterator, _InputEndIterator, _validate, true>(r_ptr, ptrEnd);
   if (isNegative) {
     if (_validate && mag > static_cast<decltype(mag)>(-numeric_limits<_i>::min())) {
       throw std::overflow_error("signed external integer had too big a negative value");
@@ -333,21 +335,21 @@ template<typename _i, typename _InputIterator, bool _validate> _i readIesImpl (_
   }
 }
 
-template<typename _i, typename _InputIterator, iff(
+template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
   std::is_integral<_i>::value && std::is_signed<_i>::value &&
   std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIes (_InputIterator &r_ptr, const _InputIterator &ptrEnd) {
-  return core::readIesImpl<_i, _InputIterator, true>(r_ptr, ptrEnd);
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
+  return core::readIesImpl<_i, _InputIterator, const _InputEndIterator, true>(r_ptr, ptrEnd);
 }
 
 template<typename _i, typename _InputIterator, iff(
   std::is_integral<_i>::value && std::is_signed<_i>::value &&
   std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
   noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
 )> _i readValidIes (_InputIterator &r_ptr) noexcept {
-  return core::readIesImpl<_i, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
+  return core::readIesImpl<_i, _InputIterator, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
 /* -----------------------------------------------------------------------------

@@ -388,7 +388,9 @@ template<typename _T0, typename _T1> void check (const _T0 &expected, const _T1 
   Checks that the list [{@c actualI}, {@c actualEnd}) is equal to
   [{@c expectedI}, {@c expectedEnd}).
 */
-template<typename _InputIterator0, typename _InputIterator1> void check (_InputIterator0 expectedI, _InputIterator0 expectedEnd, _InputIterator1 actualI, _InputIterator1 actualEnd);
+template<
+  typename _InputIterator0, typename _InputEndIterator0, typename _InputIterator1, typename _InputEndIterator1
+> void check (_InputIterator0 expectedI, _InputEndIterator0 expectedEnd, _InputIterator1 actualI, _InputEndIterator1 actualEnd);
 // TODO macro for test fn definition (it should have a specific signature) - can also add it to a vector of ptr to test fns
 // TODO fn to run all tests + do reporting
 
@@ -451,26 +453,26 @@ template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr)
 // TODO validate _OutputIterator
 template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeIeu (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
 template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeIes (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
+template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
+  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
 template<typename _i, typename _InputIterator, iff(
   std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
   std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIeu (_InputIterator &r_ptr, const _InputIterator &ptrEnd);
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
   noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
 )> _i readValidIeu (_InputIterator &r_ptr) noexcept;
+template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
+  std::is_integral<_i>::value && std::is_signed<_i>::value &&
+  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
+)> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
 template<typename _i, typename _InputIterator, iff(
   std::is_integral<_i>::value && std::is_signed<_i>::value &&
   std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIes (_InputIterator &r_ptr, const _InputIterator &ptrEnd);
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_signed<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_same<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
+  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
   noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
 )> _i readValidIes (_InputIterator &r_ptr) noexcept;
 
