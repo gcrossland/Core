@@ -5,6 +5,13 @@ namespace core {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
+template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsigned<_i>::type unsign (_i v) noexcept {
+  DPRE(v >= 0);
+  return static_cast<typename std::make_unsigned<_i>::type>(v);
+}
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
 #ifndef NDEBUG
 namespace debug {
 

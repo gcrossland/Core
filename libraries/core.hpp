@@ -228,6 +228,12 @@ template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
   pub static constexpr int max_ie_octets = ((bits + std::numeric_limits<_i>::is_signed) + 6) / 7;
 };
 
+/**
+  Returns the given value (which must be natural) in an unsigned type of the same
+  size as the original.
+*/
+template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsigned<_i>::type unsign (_i v) noexcept;
+
 }
 
 /* -----------------------------------------------------------------------------

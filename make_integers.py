@@ -15,6 +15,7 @@ def main (args):
           "#include <climits>\n" +
           "\n" +
           "using core::numeric_limits;\n" +
+          "using core::unsign;\n" +
           "using core::check;\n" +
           "\n" +
           "void testIntegers () {")
@@ -30,6 +31,8 @@ def main (args):
       f.write("    auto bits = numeric_limits<" + type + ">::bits;\n")
       f.write("    check(std::" + trait + "<" + type + ">::value);\n")
       f.write("    check(sizeof(" + type + ") * CHAR_BIT == bits);\n")
+      unsignedType = getTypeName("u", typeLen)
+      f.write("    check(typeid(" + unsignedType + "), typeid(unsign<" + type + ">(0)));\n")
 
       if typeLen == "":
         f.write("    check(bits >= numeric_limits<int>::bits); // " + type + " should probably be plain intish\n")
