@@ -14,14 +14,14 @@ const char *const Stream::INDENT = "  ";
 Stream::Stream () noexcept : handle(stderr), indentCount(0), atStartOfLine(true) {
 }
 
-Stream::Stream (const char *filename) noexcept : indentCount(0), atStartOfLine(true) {
-  if (!filename) {
+Stream::Stream (const char *pathName) noexcept : indentCount(0), atStartOfLine(true) {
+  if (!pathName) {
     dieHard();
   }
 
-  handle = fopen(filename, "wb");
+  handle = fopen(pathName, "wb");
   if (!handle) {
-    fprintf(stderr, "failed to open Stream to %s\n", filename);
+    fprintf(stderr, "failed to open Stream to %s\n", pathName);
     fflush(stderr);
     dieHard();
   }

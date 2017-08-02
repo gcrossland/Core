@@ -258,7 +258,7 @@ class Stream {
   prv bool atStartOfLine;
 
   pub explicit Stream () noexcept;
-  pub explicit Stream (const char *filename) noexcept;
+  pub explicit Stream (const char *pathName) noexcept;
   pub ~Stream () noexcept;
 
   pub void enterScope () noexcept;
