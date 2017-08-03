@@ -361,6 +361,33 @@ template<typename _i, typename _InputIterator, iff(
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
+namespace finally {
+
+template<typename _F> Finally<_F>::Finally (_F &&functor) : functor(std::move(functor)), live(true) {
+}
+
+template<typename _F> Finally<_F>::Finally (Finally &&o) : functor(std::move(o.functor)), live(o.live) {
+  o.live = false;
+}
+
+template<typename _F> Finally<_F>::~Finally () noexcept {
+  if (live) {
+    try {
+      functor();
+    } catch (...) {
+      // TODO provide a broader range of exception propagation options
+    }
+  }
+}
+
+template<typename _F> Finally<_F> finallyImpl (_F &&functor) {
+  return Finally<_F>(move(functor));
+}
+
+}
+
+/* -----------------------------------------------------------------------------
+----------------------------------------------------------------------------- */
 template<typename _I> size_t offsetImpl (const _I &first, const _I &last) noexcept(noexcept(last - first)) {
   DPRE(first <= last, "first must not be after last");
 

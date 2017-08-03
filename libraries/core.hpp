@@ -63,6 +63,12 @@ namespace core { namespace iff_impl {
 #define noexcept_auto(...) noexcept(noexcept(__VA_ARGS__)) { __VA_ARGS__; }
 #define noexcept_auto_return(...) noexcept(noexcept(__VA_ARGS__)) { return __VA_ARGS__; }
 
+/**
+  Abbreviation for creating an object wrapping the given no-arg functor and
+  calling it on destruction.
+*/
+#define finally(...) auto _finally_ ## __LINE__ = core::finally::finallyImpl(__VA_ARGS__)
+
 /* -----------------------------------------------------------------------------
    Configurations for platforms
 ----------------------------------------------------------------------------- */
@@ -558,6 +564,27 @@ template<typename _T> bool operator<= (const std::reference_wrapper<_T> &l, cons
 template<typename _T> bool operator>= (const std::reference_wrapper<_T> &l, const std::reference_wrapper<_T> &r) noexcept_auto_return(
   l.get() >= r.get()
 )
+
+/* -----------------------------------------------------------------------------
+   Lifetime management utilities
+----------------------------------------------------------------------------- */
+namespace core { namespace finally {
+
+template<typename _F> class Finally {
+  prv _F functor;
+  prv bool live;
+
+  pub explicit Finally (_F &&functor);
+  Finally (const Finally &) = delete;
+  Finally &operator= (const Finally &) = delete;
+  pub Finally (Finally &&o);
+  Finally &operator= (Finally &&) = delete;
+  pub ~Finally () noexcept;
+};
+
+template<typename _F> finally::Finally<_F> finallyImpl (_F &&functor);
+
+}}
 
 /* -----------------------------------------------------------------------------
    Array utilities
