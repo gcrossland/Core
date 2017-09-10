@@ -28,7 +28,7 @@ def main (args):
               "  {\n")
 
       trait = {"u": "is_unsigned", "s": "is_signed"}[typeSgn]
-      f.write("    auto bits = numeric_limits<" + type + ">::bits;\n")
+      f.write("    size_t bits = numeric_limits<" + type + ">::bits;\n")
       f.write("    check(std::" + trait + "<" + type + ">::value);\n")
       f.write("    check(sizeof(" + type + ") * CHAR_BIT == bits);\n")
       unsignedType = getTypeName("u", typeLen)
@@ -37,7 +37,7 @@ def main (args):
       if typeLen == "":
         f.write("    check(bits >= numeric_limits<int>::bits); // " + type + " should probably be plain intish\n")
       elif typeLen.endswith("f"):
-        f.write("    check(" + typeLen[0:-1] + ", bits);\n")
+        f.write("    check(" + typeLen[0:-1] + "U, bits);\n")
       else:
         f.write("    check(bits >= " + typeLen + ");\n")
 

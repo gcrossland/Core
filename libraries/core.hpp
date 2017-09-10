@@ -11,8 +11,12 @@
 #include <limits>
 #include <memory>
 #ifdef __GNUC__
+#ifndef __STDC_UTF_32__
 #define __STDC_UTF_32__
+#endif
+#ifndef __STDC_UTF_16__
 #define __STDC_UTF_16__
+#endif
 #else
 #include <cuchar>
 #endif
