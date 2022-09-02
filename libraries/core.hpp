@@ -1,7 +1,7 @@
 /** @file */
 /* -----------------------------------------------------------------------------
    Core Library
-   © Geoff Crossland 1998, 1999, 2003-2005, 2007, 2008, 2013-2017
+   © Geoff Crossland 1998-2022
 ----------------------------------------------------------------------------- */
 #ifndef CORE_ALREADYINCLUDED
 #define CORE_ALREADYINCLUDED
@@ -10,19 +10,11 @@
 #include <exception>
 #include <limits>
 #include <memory>
-#ifdef __GNUC__
-#ifndef __STDC_UTF_32__
-#define __STDC_UTF_32__
-#endif
-#ifndef __STDC_UTF_16__
-#define __STDC_UTF_16__
-#endif
-#else
 #include <cuchar>
-#endif
 #include <string>
 #include <functional>
 #include <cstddef>
+#include <stdexcept>
 
 #define _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) _ ## LIB ## _ ## MAJ ## _ ## MIN ## _
 #define _version_(LIB, MAJ, MIN) extern const bool _VERSION_EXPORT_NAME_(LIB, MAJ, MIN) = false;
@@ -44,9 +36,9 @@
 */
 #define pub public:
 
-namespace core { namespace iff_impl {
+namespace core::iff_impl {
   enum class DummyTemplateParameter {};
-}}
+}
 
 /**
   Abbreviation for using {@c std::enable_if<>::type} in place of a template
@@ -256,9 +248,7 @@ template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsig
 // streams.
 
 #ifndef NDEBUG
-class char8_t;
-
-namespace core { namespace debug {
+namespace core::debug {
 
 class Stream {
   prv static const char *const indent;
@@ -319,7 +309,7 @@ class Logger {
 
 template<typename ..._Ts> void assertImpl (const char *file, int line, bool cond, _Ts ...ts) noexcept;
 
-}}
+}
 #endif
 
 #define DNAME(L) __dl_ ## L
@@ -572,7 +562,7 @@ template<typename _T> bool operator>= (const std::reference_wrapper<_T> &l, cons
 /* -----------------------------------------------------------------------------
    Lifetime management utilities
 ----------------------------------------------------------------------------- */
-namespace core { namespace finally {
+namespace core::finally {
 
 template<typename _F> class Finally {
   prv _F functor;
@@ -588,7 +578,7 @@ template<typename _F> class Finally {
 
 template<typename _F> finally::Finally<_F> finallyImpl (_F &&functor);
 
-}}
+}
 
 /* -----------------------------------------------------------------------------
    Array utilities
@@ -807,70 +797,9 @@ template<typename _T> struct equal_to<std::reference_wrapper<_T>> {
 #endif
 
 /**
-  A type for storing UTF-8 code units.
-*/
-class char8_t {
-  prv iu8f v;
-
-  pub char8_t () = default;
-
-  pub constexpr explicit char8_t (iu8f v) : v(v) {
-  }
-
-  pub constexpr operator iu8f () const {
-    return v;
-  }
-
-  friend bool operator== (const char8_t &o0, const char8_t &o1) {
-    return o0.v == o1.v;
-  }
-
-  friend bool operator!= (const char8_t &o0, const char8_t &o1) {
-    return o0.v != o1.v;
-  }
-
-  friend bool operator< (const char8_t &o0, const char8_t &o1) {
-    return o0.v < o1.v;
-  }
-
-  friend bool operator> (const char8_t &o0, const char8_t &o1) {
-    return o0.v > o1.v;
-  }
-
-  friend bool operator<= (const char8_t &o0, const char8_t &o1) {
-    return o0.v <= o1.v;
-  }
-
-  friend bool operator>= (const char8_t &o0, const char8_t &o1) {
-    return o0.v >= o1.v;
-  }
-
-  pub static constexpr char8_t __convertLiteral (char c) {
-    return char8_t(static_cast<iu8f>(c));
-  }
-
-  pub static constexpr const char8_t *__convertLiteral (const char *s) {
-    return reinterpret_cast<const char8_t *>(s);
-  }
-
-  #ifdef CDT
-  pub static constexpr char8_t __convertLiteral (char16_t c);
-  pub static constexpr const char8_t *__convertLiteral (const char16_t *s);
-  #endif
-};
-/**
   The standard non-fixed type for holding Unicode code points.
 */
 typedef iu32 uchar;
-
-/**
-  Used to create a UTF-8 string or character literal of char8_ts.
-*/
-#define u8(S) char8_t::__convertLiteral(u8 ## S)
-/**
-  Used to create a UTF-32 string or character literal of char32_ts.
-*/
-#define u32(S) (U ## S)
 
 namespace core {
 

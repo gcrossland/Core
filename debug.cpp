@@ -198,7 +198,7 @@ void testDebugLoggingToFile () {
     DW(A, "line 00");
     {
       DS(A);
-      DW(A, u8("line 01"));
+      DW(A, u8"line 01");
       DCLOSE(A);
       DW(A, "line 02");
     }

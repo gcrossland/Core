@@ -253,7 +253,7 @@ template<typename _i, typename _InputIterator, typename _InputEndIterator, bool 
   do {
     if (_validate && r_ptr == ptrEnd) {
       DW(, "ran out of buffer just before reading");
-      throw PlainException(u8string(_useSignedFormat ? u8("signed") : u8("unsigned")) + u8(" external integer was truncated"));
+      throw PlainException(u8string(_useSignedFormat ? u8"signed" : u8"unsigned") + u8" external integer was truncated");
     }
 
     iu8f octet = *(r_ptr++);

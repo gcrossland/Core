@@ -191,14 +191,14 @@ void createExceptionMessagePart (const std::exception &exception, bool capitalis
     // sensible comes out.
     for (char8_t &c : tmp) {
       if (c < 32 || c >= 128) {
-        c = u8("?")[0];
+        c = u8'?';
       }
     }
   }
   // TODO if the message doesn't look like a sentence (e.g. has no spaces in), stop here? (and hoist putting the . on the end)
 
   bool headIsCapitalisable = capitaliseHead;
-  if (subMsgBegin != subMsgEnd && *subMsgBegin == u8("_")[0]) {
+  if (subMsgBegin != subMsgEnd && *subMsgBegin == u8'_') {
     headIsCapitalisable = false;
     ++subMsgBegin;
   }
@@ -213,7 +213,7 @@ void createExceptionMessagePart (const std::exception &exception, bool capitalis
       }
     }
   } else {
-    r_out.append(u8(": "));
+    r_out.append(u8": ");
     r_out.append(subMsgBegin, subMsgEnd);
   }
 
@@ -225,7 +225,7 @@ void createExceptionMessagePart (const std::exception &exception, bool capitalis
   } catch (...) {
     // Recurse no further.
   }
-  r_out.append(u8("."));
+  r_out.append(u8".");
   return;
 }
 
@@ -235,9 +235,9 @@ u8string createExceptionMessage (const std::exception &rootException, bool capit
   try {
     createExceptionMessagePart(rootException, capitaliseHead, out);
   } catch (...) {
-    out = u8("an error occurred (but further detail is unavailable, as an error occurred while gathering it).");
+    out = u8"an error occurred (but further detail is unavailable, as an error occurred while gathering it).";
     if (capitaliseHead) {
-      out.front() = u8("A")[0];
+      out.front() = u8'A';
     }
   }
 
@@ -257,7 +257,7 @@ PlainException PlainException::create (const char8_t *msgTemplate) {
   const char8_t *i = msgTemplate;
   char8_t c;
   while ((c = *(i++)) != 0) {
-    if (c == u8("%")[0]) {
+    if (c == u8'%') {
       --i;
 
       u8string msg(msgTemplate, i);
@@ -272,13 +272,13 @@ PlainException PlainException::create (const char8_t *msgTemplate) {
 void PlainException::interpolate (const char8_t *msgTemplate, u8string &r_out) {
   char8_t c;
   while ((c = *(msgTemplate++)) != 0) {
-    if (c == u8("%")[0]) {
+    if (c == u8'%') {
       c = *msgTemplate;
       if (c != 0) {
         ++msgTemplate;
         switch (c) {
           case U'%':
-            r_out.push_back(u8("%")[0]);
+            r_out.push_back(u8'%');
             break;
           default:
             break;

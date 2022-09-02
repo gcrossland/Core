@@ -13,20 +13,20 @@ using core::createExceptionMessage;
 ----------------------------------------------------------------------------- */
 void testExceptions () {
   try {
-    throw PlainException(u8("cstring message"));
+    throw PlainException(u8"cstring message");
   } catch (UException &e) {
-    check(u8string(u8("cstring message")), u8string(e.uWhat()));
+    check(u8string(u8"cstring message"), u8string(e.uWhat()));
     check(15U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 
   try {
-    throw PlainException(u8string(u8("string \u00B5essag\u1EB9")));
+    throw PlainException(u8string(u8"string \u00B5essag\u1EB9"));
   } catch (UException &e) {
-    check(u8string(u8("string \u00B5essag\u1EB9")), u8string(e.uWhat()));
+    check(u8string(u8"string \u00B5essag\u1EB9"), u8string(e.uWhat()));
     check(17U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 
-  const char8_t *m0 = u8("another cstring message");
+  const char8_t *m0 = u8"another cstring message";
   try {
     throw PlainException::create(m0);
   } catch (UException &e) {
@@ -34,9 +34,9 @@ void testExceptions () {
   }
 
   try {
-    throw PlainException::create(u8("\u03B1nother %%\u03C3tring message"));
+    throw PlainException::create(u8"\u03B1nother %%\u03C3tring message");
   } catch (UException &e) {
-    check(u8string(u8("\u03B1nother %\u03C3tring message")), u8string(e.uWhat()));
+    check(u8string(u8"\u03B1nother %\u03C3tring message"), u8string(e.uWhat()));
     check(25U, std::strlen(reinterpret_cast<const char *>(e.uWhat())));
   }
 }
@@ -47,15 +47,15 @@ void testCreateExceptionMessage () {
       try {
         throw runtime_error("an op\xA3ration failed");
       } catch (...) {
-        nthrow(PlainException(u8("a thing could not be comput\u00A3d")));
+        nthrow(PlainException(u8"a thing could not be comput\u00A3d"));
       }
     } catch (const exception &e) {
-      nthrow(PlainException(u8("the user-requested action failed")));
+      nthrow(PlainException(u8"the user-requested action failed"));
     }
     check(false);
   } catch (const exception &e) {
     u8string wholeMsg = createExceptionMessage(e, true);
-    check(u8string(u8("The user-requested action failed: a thing could not be comput\u00A3d: an op?ration failed.")), wholeMsg);
+    check(u8string(u8"The user-requested action failed: a thing could not be comput\u00A3d: an op?ration failed."), wholeMsg);
   } catch (...) {
     check(false);
   }
@@ -65,15 +65,15 @@ void testCreateExceptionMessage () {
       try {
         throw runtime_error("__ghi");
       } catch (...) {
-        nthrow(PlainException(u8string(u8("_def"))));
+        nthrow(PlainException(u8string(u8"_def")));
       }
     } catch (const exception &e) {
-      nthrow(PlainException(u8("_abc")));
+      nthrow(PlainException(u8"_abc"));
     }
     check(false);
   } catch (const exception &e) {
     u8string wholeMsg = createExceptionMessage(e, true);
-    check(u8string(u8("abc: def: _ghi.")), wholeMsg);
+    check(u8string(u8"abc: def: _ghi."), wholeMsg);
   } catch (...) {
     check(false);
   }
@@ -82,12 +82,12 @@ void testCreateExceptionMessage () {
     try {
       throw "lm";
     } catch (...) {
-      nthrow(PlainException(u8("jk")));
+      nthrow(PlainException(u8"jk"));
     }
     check(false);
   } catch (const exception &e) {
     u8string wholeMsg = createExceptionMessage(e, false);
-    check(u8string(u8("jk.")), wholeMsg);
+    check(u8string(u8"jk."), wholeMsg);
   } catch (...) {
     check(false);
   }
