@@ -261,7 +261,7 @@ class char8_t;
 namespace core { namespace debug {
 
 class Stream {
-  prv static const char *const INDENT;
+  prv static const char *const indent;
 
   prv FILE *handle;
   prv iu indentCount;

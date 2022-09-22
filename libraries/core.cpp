@@ -9,7 +9,7 @@ namespace core {
 #ifndef NDEBUG
 namespace debug {
 
-const char *const Stream::INDENT = "  ";
+const char *const Stream::indent = "  ";
 
 Stream::Stream () noexcept : handle(stderr), indentCount(0), atStartOfLine(true) {
 }
@@ -51,7 +51,7 @@ void Stream::startLine () noexcept {
   }
 
   for (iu i = 0; i < indentCount; ++i) {
-    writeElement(INDENT);
+    writeElement(indent);
   }
   atStartOfLine = false;
 }
