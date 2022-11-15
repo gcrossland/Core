@@ -5,7 +5,7 @@ namespace core {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsigned<_i>::type unsign (_i v) noexcept {
+template<std::integral _i> typename std::make_unsigned<_i>::type unsign (_i v) noexcept {
   DPRE(v >= 0);
   return static_cast<typename std::make_unsigned<_i>::type>(v);
 }
@@ -15,7 +15,7 @@ template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsig
 #ifndef NDEBUG
 namespace debug {
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void Stream::writeElement (_i value) noexcept {
+template<std::unsigned_integral _i> void Stream::writeElement (_i value) noexcept {
   if (!handle) {
     dieHard();
   }
@@ -31,7 +31,7 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   }
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void Stream::writeElement (_i value) noexcept {
+template<std::signed_integral _i> void Stream::writeElement (_i value) noexcept {
   if (!handle) {
     dieHard();
   }
@@ -171,7 +171,7 @@ template<typename _i> _i sl (_i value, iu sh) noexcept {
 }
 
 #ifdef ARCH_TWOCINTS
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i sr (_i value, iu sh) noexcept {
+template<std::unsigned_integral _i> _i sr (_i value, iu sh) noexcept {
   iu shMax = numeric_limits<_i>::bits - 1;
   #ifdef ARCH_MAXRIGHTSHIFT
   shMax = ARCH_MAXRIGHTSHIFT;
@@ -183,7 +183,7 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::v
   return static_cast<_i>(value >> sh);
 }
 
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i sr (_i value, iu sh) noexcept {
+template<std::signed_integral _i> _i sr (_i value, iu sh) noexcept {
   iu shMax = numeric_limits<_i>::bits - 1;
   #ifdef ARCH_MAXRIGHTSHIFT
   shMax = ARCH_MAXRIGHTSHIFT;
@@ -201,7 +201,7 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 }
 #endif
 
-template<typename _i, iff(std::is_integral<_i>::value)> void set (iu8f *ptr, _i value) noexcept {
+template<std::integral _i> void set (iu8f *ptr, _i value) noexcept {
   #ifdef ARCH_LOOSEALIGNMENT
   *reinterpret_cast<_i *>(ptr) = value;
   #else
@@ -209,7 +209,7 @@ template<typename _i, iff(std::is_integral<_i>::value)> void set (iu8f *ptr, _i 
   #endif
 }
 
-template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr) noexcept {
+template<std::integral _i> _i get (const iu8f *ptr) noexcept {
   #ifdef ARCH_LOOSEALIGNMENT
   return *reinterpret_cast<const _i *>(ptr);
   #else
@@ -287,11 +287,11 @@ template<typename _i, typename _InputIterator, typename _InputEndIterator, bool 
   } while (true);
 }
 
-template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeIeu (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++))) {
+template<std::unsigned_integral _i, core::OutputIterator<iu8f> _OutputIterator> void writeIeu (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++))) {
   core::writeIex<_i, _OutputIterator, false>(r_ptr, value, false);
 }
 
-template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeIes (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++))) {
+template<std::signed_integral _i, core::OutputIterator<iu8f> _OutputIterator> void writeIes (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++))) {
   typename std::make_unsigned<_i>::type mag;
   bool isNegative;
   if (value < 0) {
@@ -308,20 +308,17 @@ template<typename _i, typename _InputIterator, typename _InputEndIterator, bool 
   return std::get<0>(core::readIex<_i, _InputIterator, _InputEndIterator, _validate, false>(r_ptr, ptrEnd));
 }
 
-template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
+template<
+  std::unsigned_integral _i, core::InputIterator<iu8f> _InputIterator, typename _InputEndIterator
+> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
   return core::readIeuImpl<_i, _InputIterator, const _InputEndIterator, true>(r_ptr, ptrEnd);
 }
 
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
-  noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
-)> _i readValidIeu (_InputIterator &r_ptr) noexcept {
+template<
+  std::unsigned_integral _i, core::InputIterator<iu8f> _InputIterator
+> requires requires (_InputIterator i) {
+  {*(i++)} noexcept;
+} _i readValidIeu (_InputIterator &r_ptr) noexcept {
   return core::readIeuImpl<_i, _InputIterator, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
@@ -342,20 +339,17 @@ template<typename _i, typename _InputIterator, typename _InputEndIterator, bool 
   }
 }
 
-template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
-  std::is_integral<_i>::value && std::is_signed<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
+template<
+  std::signed_integral _i, core::InputIterator<iu8f> _InputIterator, typename _InputEndIterator
+> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd) {
   return core::readIesImpl<_i, _InputIterator, const _InputEndIterator, true>(r_ptr, ptrEnd);
 }
 
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_signed<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
-  noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
-)> _i readValidIes (_InputIterator &r_ptr) noexcept {
+template<
+  std::signed_integral _i, core::InputIterator<iu8f> _InputIterator
+> requires requires (_InputIterator i) {
+  {*(i++)} noexcept;
+} _i readValidIes (_InputIterator &r_ptr) noexcept {
   return core::readIesImpl<_i, _InputIterator, _InputIterator, false>(r_ptr, *static_cast<_InputIterator *>(nullptr));
 }
 
@@ -398,9 +392,9 @@ template<typename _I> size_t offsetImpl (const _I &first, const _I &last) noexce
   return d1;
 }
 
-template<typename _I, iff(
-  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
-)> size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first)) {
+template<typename _I> requires requires (const _I &first, const _I &last) {
+  {last - first} -> std::same_as<ptrdiff_t>;
+} size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first)) {
   return offsetImpl(first, last);
 }
 
@@ -410,9 +404,9 @@ template<typename _T> size_t offset (_T *first, _T *last) noexcept {
 
 /* -----------------------------------------------------------------------------
 ----------------------------------------------------------------------------- */
-template<typename _T> template<typename ..._Ts, iff(
-  std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
-)> SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o))) :
+template<typename _T> template<typename ..._Ts> requires requires (_Ts &&...ts) {
+  {_T(std::forward<_Ts>(ts)...)} -> std::same_as<_T>;
+} SlowHashWrapper<_T>::SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o))) :
   o(std::forward<_Ts>(ts)...), h(hashSlow(o))
 {
 }
@@ -433,9 +427,9 @@ template<typename _T> bool SlowHashWrapper<_T>::operator== (const SlowHashWrappe
   return hashFast() == r.hashFast() && get() == r.get();
 }
 
-template<typename _T> template<typename ..._Ts, iff(
-  std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
-)> FastHashWrapper<_T>::FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...))) :
+template<typename _T> template<typename ..._Ts> requires requires (_Ts &&...ts) {
+  {_T(std::forward<_Ts>(ts)...)} -> std::same_as<_T>;
+} FastHashWrapper<_T>::FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...))) :
   o(std::forward<_Ts>(ts)...)
 {
 }

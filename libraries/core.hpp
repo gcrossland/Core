@@ -36,16 +36,6 @@
 */
 #define pub public:
 
-namespace core::iff_impl {
-  enum class DummyTemplateParameter {};
-}
-
-/**
-  Abbreviation for using {@c std::enable_if<>::type} in place of a template
-  parameter.
-*/
-#define iff(...) typename std::enable_if<__VA_ARGS__, core::iff_impl::DummyTemplateParameter>::type...
-
 /**
   Abbreviation for {@c std::throw_with_nested()}.
 */
@@ -234,7 +224,7 @@ template<typename _i> class numeric_limits : public std::numeric_limits<_i> {
   Returns the given value (which must be natural) in an unsigned type of the same
   size as the original.
 */
-template<typename _i, iff(std::is_integral<_i>::value)> typename std::make_unsigned<_i>::type unsign (_i v) noexcept;
+template<std::integral _i> typename std::make_unsigned<_i>::type unsign (_i v) noexcept;
 
 }
 
@@ -269,8 +259,8 @@ class Stream {
   pub void flush () noexcept;
   pub void writeElement (const char *value) noexcept;
   pub void writeElement (const char8_t *value) noexcept;
-  pub template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeElement (_i value) noexcept;
-  pub template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeElement (_i value) noexcept;
+  pub template<std::unsigned_integral _i> void writeElement (_i value) noexcept;
+  pub template<std::signed_integral _i> void writeElement (_i value) noexcept;
 };
 
 class Logger {
@@ -438,8 +428,8 @@ template<typename _i> _i sl (_i value, iu sh) noexcept;
   @param sh the number of places to shift right by.
   @return value asr sh
 */
-template<typename _i, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> _i sr (_i value, iu sh) noexcept;
-template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> _i sr (_i value, iu sh) noexcept;
+template<std::unsigned_integral _i> _i sr (_i value, iu sh) noexcept;
+template<std::signed_integral _i> _i sr (_i value, iu sh) noexcept;
 
 // These allow writing of integer types to octet arrays of arbitrary alignment,
 // using the local platform's integer representation format (i.e. giving the
@@ -448,39 +438,70 @@ template<typename _i, iff(std::is_integral<_i>::value && std::is_signed<_i>::val
 /**
   Writes a value of type {@p _i} to the given octet array.
 */
-template<typename _i, iff(std::is_integral<_i>::value)> void set (iu8f *ptr, _i value) noexcept;
+template<std::integral _i> void set (iu8f *ptr, _i value) noexcept;
 /**
   Reads a value of type {@p _i} from the given octet array.
 */
-template<typename _i, iff(std::is_integral<_i>::value)> _i get (const iu8f *ptr) noexcept;
+template<std::integral _i> _i get (const iu8f *ptr) noexcept;
 
 // ... and a platform-independent variable-length format.
 
-// TODO validate _OutputIterator
-template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_unsigned<_i>::value)> void writeIeu (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
-template<typename _i, typename _OutputIterator, iff(std::is_integral<_i>::value && std::is_signed<_i>::value)> void writeIes (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
-template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_unsigned<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
-  noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
-)> _i readValidIeu (_InputIterator &r_ptr) noexcept;
-template<typename _i, typename _InputIterator, typename _InputEndIterator, iff(
-  std::is_integral<_i>::value && std::is_signed<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value
-)> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
-template<typename _i, typename _InputIterator, iff(
-  std::is_integral<_i>::value && std::is_signed<_i>::value &&
-  std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<_InputIterator>::iterator_category>::value &&
-  std::is_convertible<typename std::iterator_traits<_InputIterator>::value_type, iu8f>::value &&
-  noexcept(*((*static_cast<_InputIterator *>(nullptr))++))
-)> _i readValidIes (_InputIterator &r_ptr) noexcept;
+/**
+  An input iterator of value type {@p _T}.
+*/
+template<typename _Iterator, typename _T> concept InputIterator =
+  std::input_or_output_iterator<_Iterator> &&
+  std::derived_from<typename std::iterator_traits<_Iterator>::iterator_category, std::input_iterator_tag> &&
+  std::same_as<std::iter_value_t<_Iterator>, _T>
+;
+/**
+  An output iterator of value type {@p _T}.
+*/
+template<typename _Iterator, typename _T> concept OutputIterator = std::output_iterator<_Iterator, _T>;
+
+/**
+  Writes a value of type {@p _i} to the given octet stream in an unsigned
+  variable-length format.
+*/
+template<std::unsigned_integral _i, core::OutputIterator<iu8f> _OutputIterator> void writeIeu (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
+/**
+  Writes a value of type {@p _i} to the given octet stream in a signed
+  variable-length format.
+*/
+template<std::signed_integral _i, core::OutputIterator<iu8f> _OutputIterator> void writeIes (_OutputIterator &r_ptr, _i value) noexcept(noexcept(*(r_ptr++)));
+
+/**
+  Reads a value of type {@p _i} from the given octet stream in an unsigned
+  variable-length format, if possible.
+*/
+template<
+  std::unsigned_integral _i, core::InputIterator<iu8f> _InputIterator, typename _InputEndIterator
+> _i readIeu (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
+/**
+  Reads a value of type {@p _i} from the given octet stream in an unsigned
+  variable-length format.
+*/
+template<
+  std::unsigned_integral _i, core::InputIterator<iu8f> _InputIterator
+> requires requires (_InputIterator i) {
+  {*(i++)} noexcept;
+} _i readValidIeu (_InputIterator &r_ptr) noexcept;
+/**
+  Reads a value of type {@p _i} from the given octet stream in a signed
+  variable-length format, if possible.
+*/
+template<
+  std::signed_integral _i, core::InputIterator<iu8f> _InputIterator, typename _InputEndIterator
+> _i readIes (_InputIterator &r_ptr, const _InputEndIterator &ptrEnd);
+/**
+  Reads a value of type {@p _i} from the given octet stream in a signed
+  variable-length format.
+*/
+template<
+  std::signed_integral _i, core::InputIterator<iu8f> _InputIterator
+> requires requires (_InputIterator i) {
+  {*(i++)} noexcept;
+} _i readValidIes (_InputIterator &r_ptr) noexcept;
 
 }
 
@@ -490,50 +511,50 @@ template<typename _i, typename _InputIterator, iff(
 /**
   eq operator implementation for objects based on their eq member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator==(std::declval<const _T>()))>::value
-)> bool operator== (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator==(r);
+} bool operator== (const _T &l, const _T &r) noexcept_auto_return(
   l.operator==(r)
 );
 /**
   ne operator implementation for objects based on their eq member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator==(std::declval<const _T>()))>::value
-)> bool operator!= (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator==(r);
+} bool operator!= (const _T &l, const _T &r) noexcept_auto_return(
   !l.operator==(r)
 )
 
 /**
   lt operator implementation for objects based on their lt member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
-)> bool operator< (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator<(r);
+} bool operator< (const _T &l, const _T &r) noexcept_auto_return(
   l.operator<(r)
 )
 /**
   gt operator implementation for objects based on their lt member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
-)> bool operator> (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator<(r);
+} bool operator> (const _T &l, const _T &r) noexcept_auto_return(
   r.operator<(l)
 )
 /**
   le operator implementation for objects based on their lt member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
-)> bool operator<= (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator<(r);
+} bool operator<= (const _T &l, const _T &r) noexcept_auto_return(
   !r.operator<(l)
 )
 /**
   ge operator implementation for objects based on their lt member function.
 */
-template<typename _T, iff(
-  std::is_same<bool, decltype(std::declval<const _T>().operator<(std::declval<const _T>()))>::value
-)> bool operator>= (const _T &l, const _T &r) noexcept_auto_return(
+template<typename _T> requires requires (const _T &l, const _T &r) {
+  l.operator<(r);
+} bool operator>= (const _T &l, const _T &r) noexcept_auto_return(
   !l.operator<(r)
 )
 
@@ -589,9 +610,9 @@ namespace core {
   Returns the {@c ptrdiff_t} difference between {@p first} and {@p last},
   where {@c first <= last}, as a {@c size_t}.
 */
-template<typename _I, iff(
-  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
-)> size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first));
+template<typename _I> requires requires (const _I &first, const _I &last) {
+  {last - first} -> std::same_as<ptrdiff_t>;
+} size_t offset (const _I &first, const _I &last) noexcept(noexcept(last - first));
 template<typename _T> size_t offset (_T *first, _T *last) noexcept;
 
 }
@@ -599,9 +620,9 @@ template<typename _T> size_t offset (_T *first, _T *last) noexcept;
 /**
   Implementation of iterator advancement that admits {@c size_t} for {@c ptrdiff_t}.
 */
-template<typename _I, iff(
-  std::is_same<ptrdiff_t, decltype(std::declval<_I>() - std::declval<_I>())>::value
-)> _I operator+ (const _I &i, size_t o) noexcept(noexcept(i + std::declval<ptrdiff_t>())) {
+template<typename _I> requires requires (const _I &i) {
+  {i - i} -> std::same_as<ptrdiff_t>;
+} _I operator+ (const _I &i, size_t o) noexcept(noexcept(i + std::declval<ptrdiff_t>())) {
   DPRE(o <= static_cast<typename std::make_unsigned<ptrdiff_t>::type>(core::numeric_limits<ptrdiff_t>::max())  , "o must be a size");
 
   return i + static_cast<ptrdiff_t>(o);
@@ -621,37 +642,48 @@ size_t hash (const iu8f *i, const iu8f *end) noexcept;
   Implementation of {@c size_t hashSlow (const _T &)}) that leans on a
   corresponding member function.
 */
-template<typename _T, iff(
-  std::is_same<size_t, decltype(std::declval<const _T>().hashSlow())>::value
-)> size_t hashSlow (const _T &o) noexcept_auto_return(
+template<typename _T> requires requires (const _T &o) {
+  {o.hashSlow()} -> std::same_as<size_t>;
+} size_t hashSlow (const _T &o) noexcept_auto_return(
   o.hashSlow()
 )
 /**
   Implementation of {@c size_t hashFast (const _T &) noexcept}) that leans on a
   corresponding member function.
 */
-template<typename _T, iff(
-  std::is_same<size_t, decltype(std::declval<const _T>().hashFast())>::value && noexcept(std::declval<const _T>().hashFast())
-)> size_t hashFast (const _T &o) noexcept {
+template<typename _T> requires requires (const _T &o) {
+  {o.hashFast()} noexcept -> std::same_as<size_t>;
+} size_t hashFast (const _T &o) noexcept {
   return o.hashFast();
 }
+
+/**
+  Exposes a hash value (from {@c size_t hashSlow (const _T &)}) that may be
+  non-trivial to calculate.
+*/
+template<typename _T> concept SlowHashable = requires (const _T &o) {
+  {hashSlow(o)} -> std::same_as<size_t>;
+};
+/**
+  Exposes a hash value (from {@c size_t hashFast (const _T &) noexcept}) that is
+  so trivial to calculate that it does not need to be persistently cached.
+*/
+template<typename _T> concept FastHashable = requires (const _T &o) {
+  {hashFast(o)} noexcept -> std::same_as<size_t>;
+};
 
 /**
   Implementation of {@c size_t hashSlow (const std::reference_wrapper<_T> &)})
   that leans on the referenced object.
 */
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
-)> size_t hashSlow (const std::reference_wrapper<_T> &o) noexcept_auto_return(
+template<SlowHashable _T> size_t hashSlow (const std::reference_wrapper<_T> &o) noexcept_auto_return(
   hashSlow(o.get())
 )
 /**
   Implementation of {@c size_t hashFast (const std::reference_wrapper<_T> &) noexcept})
   that leans on the referenced object.
 */
-template<typename _T, iff(
-  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
-)> size_t hashFast (const std::reference_wrapper<_T> &o) noexcept {
+template<FastHashable _T> size_t hashFast (const std::reference_wrapper<_T> &o) noexcept {
   return hashFast(o.get());
 }
 
@@ -663,9 +695,9 @@ template<typename _T> class SlowHashWrapper {
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded) and stores its hash.
   */
-  pub template<typename ..._Ts, iff(
-    std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
-  )> explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
+  pub template<typename ..._Ts> requires requires (_Ts &&...ts) {
+    {_T(std::forward<_Ts>(ts)...)} -> std::same_as<_T>;
+  } explicit SlowHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)) && noexcept(hashSlow(o)));
 
   /**
     Returns a reference to the wrapped object.
@@ -693,9 +725,9 @@ template<typename _T> class FastHashWrapper {
     Constructs the wrapped object in-place (by calling the constructor for
     {@c _T} with the given arguments forwarded).
   */
-  pub template<typename ..._Ts, iff(
-    std::is_same<_T, decltype(_T(std::declval<_Ts>()...))>::value
-  )> explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
+  pub template<typename ..._Ts> requires requires (_Ts &&...ts) {
+    {_T(std::forward<_Ts>(ts)...)} -> std::same_as<_T>;
+  } explicit FastHashWrapper (_Ts &&...ts) noexcept(noexcept(_T(std::forward<_Ts>(ts)...)));
 
   /**
     Returns a reference to the wrapped object.
@@ -721,17 +753,17 @@ template<typename _T> class FastHashWrapper {
   {@c size_t hashSlow (const _T &)} or
   {@c size_t hashFast (const _T &) noexcept}).
 */
-template<typename _T, typename = void> class HashWrapper;
+template<typename _T> class HashWrapper;
 
-template<typename _T> class HashWrapper<_T, typename std::enable_if<
-  std::is_same<size_t, decltype(hashSlow(std::declval<const _T>()))>::value
->::type> : public SlowHashWrapper<_T> {
+template<typename _T> requires requires (const _T &o) {
+  {hashSlow(o)} -> std::same_as<size_t>;
+} class HashWrapper<_T> : public SlowHashWrapper<_T> {
   pub using SlowHashWrapper<_T>::SlowHashWrapper;
 };
 
-template<typename _T> class HashWrapper<_T, typename std::enable_if<
-  std::is_same<size_t, decltype(hashFast(std::declval<const _T>()))>::value && noexcept(hashFast(std::declval<const _T>()))
->::type> : public FastHashWrapper<_T> {
+template<typename _T> requires requires (const _T &o) {
+  {hashFast(o)} noexcept -> std::same_as<size_t>;
+} class HashWrapper<_T> : public FastHashWrapper<_T> {
   pub using FastHashWrapper<_T>::FastHashWrapper;
 };
 
